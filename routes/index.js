@@ -56,8 +56,8 @@ router.get('/botometer', function(req, res, next) {
             },
             {
               "title": "Here is the distribution",
-              "title_link": `http://localhost:3000/images/botometerAnalyser/${result.imageUrl}.png`,
-              "image_url": `http://localhost:3000/images/botometerAnalyser/${result.imageUrl}.png`
+              "title_link": `${config.get('hooks.domain')}/images/botometerAnalyser/${result.imageUrl}.png`,
+              "image_url": `${config.get('hooks.domain')}/images/botometerAnalyser/${result.imageUrl}.png`
             }
           ]
         },
