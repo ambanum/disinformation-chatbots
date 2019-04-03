@@ -1,0 +1,19 @@
+{
+    "hooks": {
+        "botometerAnalyser": {
+            "mattermost": {
+                "token": "zywgpfknhpg7dm4gf9tpf75rsh",
+                "username": "botometer",
+                "icon": "https://botometer.iuni.iu.edu/assets/img/twitter-robot-bird.png"
+            },
+            "minScoreBot": 3.8,
+            "maxScoreHuman": 1,
+            "maxScore": 5,
+            "minScore": 0,
+            "range": 0.5,
+            "nbDay": 7,
+            "searchCount": 10,
+            "dbFileName": "botometerAnalyser_cache.json"
+        }
+    }
+}
