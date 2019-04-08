@@ -23,11 +23,14 @@ router.get('/', async function (req, res, next) {
         });
     }
 
+    const activeJobsCount = await queue.getActiveCount();    
+
     res.json({
         response_type: "in_channel",
         icon_url: botIconUrl,
         username: botUsername,
-        text: `Roger! I'm analysing the probability that the accounts (100 max) that have tweeted "${search}" in the past week are robots. This should take 40 minutes max.`
+        text: `Roger! I'm analysing the probability that the accounts (100 max) that have tweeted "${search}" in the past week are robots.` 
+            + (activeJobsCount ? `\n:warning: There is already an analyse running, your request will be processed later.` : `\nThis should take 40 minutes max.`)
     });
 
     await queue.add({
