@@ -2,6 +2,8 @@ const config = require('config');
 const ChartjsNode = require('chartjs-node');
 const uuidv1 = require('uuid/v1');
 
+const utils = require('./utils');
+
 function generateFromScores(usersScores, sharesScores) {
 	const options = {
 		type: 'line',
@@ -9,7 +11,7 @@ function generateFromScores(usersScores, sharesScores) {
 			labels: rangeLabel(),
 			datasets: [{
 				label: 'percentage of users by range',
-				data: percentageOfUserByScoreRange(usersScores),
+				data: utils.percentageOfUserByScoreRange(usersScores),
 				backgroundColor: 'rgba(87, 181, 96, 0.3)',
 				borderColor: 'rgba(87, 181, 96, 1)',
 				// Hide points
@@ -19,7 +21,7 @@ function generateFromScores(usersScores, sharesScores) {
 			},
 			{
 				label: 'percentage of shares by range',
-				data: percentageOfUserByScoreRange(sharesScores),
+				data: utils.percentageOfUserByScoreRange(sharesScores),
 				backgroundColor: 'rgba(101, 154, 206, 0.3)',
 				borderColor: 'rgba(101, 154, 206, 1.00)',
 				// Hide points
@@ -81,29 +83,6 @@ function generateFromScores(usersScores, sharesScores) {
 		});
 }
 
-function percentageBetweenValues(scores, minScore, maxScore) {
-	const total = scores.filter((score) => {
-		if (maxScore === config.get('hooks.botometerAnalyser.maxScore')) {
-			return score >= minScore;
-		}
-		return score >= minScore && score < maxScore;
-	}).length;
-	return Math.round(total / scores.length * 100);
-};
-
-function percentageOfUserByScoreRange(scores) {
-	let stepMin = 0;
-	let stepMax = config.get('hooks.botometerAnalyser.range');
-	let result = [];
-	while (stepMax <= config.get('hooks.botometerAnalyser.maxScore')) {
-		result.push(percentageBetweenValues(scores, stepMin, stepMax));
-		stepMin += config.get('hooks.botometerAnalyser.range');
-		stepMax += config.get('hooks.botometerAnalyser.range');
-	};
-
-	return result;
-}
-
 function rangeLabel() {
 	let label = 0;
 
@@ -122,7 +101,5 @@ function rangeLabel() {
 
 module.exports = {
 	generateFromScores,
-	percentageBetweenValues,
-	percentageOfUserByScoreRange,
 	rangeLabel,
 };

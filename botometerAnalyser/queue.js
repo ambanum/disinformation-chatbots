@@ -1,7 +1,7 @@
 const config = require('config');
 const request = require('request-promise');
 const Bull = require('bull');
-const botometerAnalyser = require('../botometerAnalyser/index');
+const analyse = require('./index');
 
 const queue = new Bull('Botometer analysis', {
     limiter: {
@@ -13,7 +13,11 @@ const queue = new Bull('Botometer analysis', {
 
 queue.process(async (job) => {
     console.log(`Botometer analyser: Running job for search "${job.data.search}" requested by "${job.data.requesterUsername}"`);
-    return botometerAnalyser(job.data.search);
+    try {
+        return analyse(job.data.search);
+    } catch (e) {
+        console.error(e);
+    }
 });
 
 queue.on('completed', (job, result) => {
