@@ -14,7 +14,7 @@
     "express": "~4.16.0",
     "lowdb": "^1.0.0",
     "morgan": "~1.9.0",
-    "node-botometer": "^0.1.7",
+    "node-botometer": "ambanum/node-botometer#master",
     "request": "^2.88.0",
     "twit": "^2.2.11",
     "uuid": "^3.3.2"
