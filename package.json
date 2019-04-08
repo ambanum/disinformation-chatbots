@@ -1,5 +1,5 @@
 {
-  "name": "mattermost-webhook",
+  "name": "desinfo-mattermost-integrations",
   "version": "0.0.0",
   "private": true,
   "scripts": {
