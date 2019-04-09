@@ -27,15 +27,15 @@ function analyze(searchedTerm) {
         .then((response) => {
             const tweets = response.data.statuses;
             const now = new Date().getTime();
-            const yesterday = now - (config.get('hooks.botometerAnalyser.nbDay') * 24 * 3600 * 1000);
-            const lastDayTweets = tweets.filter(tweet => yesterday - new Date(tweet.created_at) < 0);
+            const before = now - (config.get('hooks.botometerAnalyser.nbDay') * 24 * 3600 * 1000);
+            result.lastDayTweets = tweets.filter(tweet => before - new Date(tweet.created_at) < 0);
 
-            const totalRetweetCount = lastDayTweets.reduce((accumulator, currentValue) => accumulator + currentValue.retweet_count, 0);
-            const totalFavoriteCount = lastDayTweets.reduce((accumulator, currentValue) => accumulator + currentValue.favorite_count, 0);
-
+            result.totalRetweetCount = result.lastDayTweets.reduce((accumulator, currentValue) => accumulator + currentValue.retweet_count, 0);
+            result.totalFavoriteCount = result.lastDayTweets.reduce((accumulator, currentValue) => accumulator + currentValue.favorite_count, 0);
+        })
+        .then(() => {
             let users = [];
-
-            lastDayTweets.forEach((tweet) => {
+            result.lastDayTweets.forEach((tweet) => {
                 users.push(tweet.user.screen_name);
 
                 if (!tweet.retweet_count) {
@@ -50,14 +50,13 @@ function analyze(searchedTerm) {
                     });
             });
 
-            result.lastDayTweets = lastDayTweets;
-
             console.log(`In the last ${config.get('hooks.botometerAnalyser.nbDay') > 1 ? `${config.get('hooks.botometerAnalyser.nbDay')} days` : 'day'}`);
-            console.log('Number of tweets containing this search:', lastDayTweets.length);
-            console.log('Number of retweets for tweets containing this search:', totalRetweetCount);
-            console.log('Number of likes for tweets containing this search:', totalFavoriteCount);
-            
+            console.log('Number of tweets containing this search:', result.lastDayTweets.length);
+            console.log('Number of retweets for tweets containing this search:', result.totalRetweetCount);
+            console.log('Number of likes for tweets containing this search:', result.totalFavoriteCount);
+
             debug('Users:', users);
+            console.log('Number of accounts:', users.length);
             return users;
         })
         .then((users) => {
