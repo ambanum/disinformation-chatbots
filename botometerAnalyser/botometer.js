@@ -11,13 +11,14 @@ const B = new Botometer({
     app_only_auth: true,
     mashape_key: config.get('hooks.botometerAnalyser.botometer.mashape_key'),
     rate_limit: 0,
-    log_progress: false,
-    include_user: true,
+    log_progress: true,
+    include_user: false,
     include_timeline: false,
     include_mentions: false
 });
 
-function getScores(users) {
+//TODO: move to higher level cache managment 
+function getScores(users = []) {
     return new Promise((resolve, reject) => {
         const cachedUsersScore = [];
         const unscoredUsers = [];
@@ -28,7 +29,7 @@ function getScores(users) {
                 cachedUsersScore.push({
                     name: user,
                     score: cachedUserScore
-                })
+                });
             } else {
                 unscoredUsers.push(user)
             }
@@ -42,7 +43,7 @@ function getScores(users) {
         B.getBatchBotScores(uniqueUnscoredUsers, data => {
             const freshUsersScores = data.map((d) => {
                 return {
-                    name: d.user.screen_name,
+                    name: d.botometer.user.screen_name,
                     score: d.botometer.display_scores.universal
                 }
             });
@@ -58,21 +59,22 @@ function getScores(users) {
             });
 
             const scores = allUsersScore.map((user) => user.score);
-            const uniqueUserScores = allUsersScore
+            const uniqueUsersScores = allUsersScore
                 .filter((userScore, index, self) => index === self.findIndex((uS) => uS.name === userScore.name))
                 .map((user) => user.score);
 
             debug('scores', scores);
-            debug('uniqueUserScores', uniqueUserScores);
+            debug('uniqueUsersScores', uniqueUsersScores);
 
             resolve({
                 scores,
-                uniqueUserScores 
+                uniqueUsersScores 
             });
         });
     });
 }
 
 module.exports = {
-    getScores
+    getScores,
+    B
 };

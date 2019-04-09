@@ -66,17 +66,17 @@ function analyze(searchedTerm) {
             console.log('Number of retweets for tweets containing this search:', result.totalRetweetCount);
             console.log('Number of likes for tweets containing this search:', result.totalFavoriteCount);
             console.log('Number of users (from tweets and retweets):', result.users.length);
-
+            
             return botometer.getScores(result.users);
         })
         .then((botometerScores) => {
             result.scores = botometerScores.scores;
-            result.uniqueUserScores = botometerScores.uniqueUserScores;
-            return graph.generateFromScores(botometerScores.uniqueUserScores, botometerScores.scores);
+            result.uniqueUsersScores = botometerScores.uniqueUsersScores;
+            return graph.generateFromScores(botometerScores.uniqueUsersScores, botometerScores.scores);
         })
         .then((imageFileName) => {
             const sharesPercentage = utils.percentages(result.scores);
-            const usersPercentage = utils.percentages(result.uniqueUserScores);
+            const usersPercentage = utils.percentages(result.uniqueUsersScores);
             return {
                 shares: {
                     total: result.lastDayTweets.length,
