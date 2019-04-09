@@ -29,39 +29,45 @@ function analyze(searchedTerm) {
             const now = new Date().getTime();
             const before = now - (config.get('hooks.botometerAnalyser.nbDay') * 24 * 3600 * 1000);
             result.lastDayTweets = tweets.filter(tweet => before - new Date(tweet.created_at) < 0);
-
             result.totalRetweetCount = result.lastDayTweets.reduce((accumulator, currentValue) => accumulator + currentValue.retweet_count, 0);
             result.totalFavoriteCount = result.lastDayTweets.reduce((accumulator, currentValue) => accumulator + currentValue.favorite_count, 0);
         })
         .then(() => {
-            let users = [];
+            result.users = result.lastDayTweets.map((tweet) => tweet.user.screen_name);
+            console.log('Number of users (only from search result):', result.users.length);
+            
+            let promises = [];
             result.lastDayTweets.forEach((tweet) => {
-                users.push(tweet.user.screen_name);
-
+                // if there are no retweets, nothing to do
                 if (!tweet.retweet_count) {
                     return;
                 }
 
-                T.get(`statuses/retweets/${tweet.id_str}`, { count: 100})
+                // if this is a retweet, adds original tweet's user in the list
+                if (tweet.retweeted_status) {
+                    result.users.push(tweet.retweeted_status.user.screen_name);
+                }
+
+                promises.push(T.get(`statuses/retweets/:id`, { id: tweet.retweeted_status.id_str, count: config.get('hooks.botometerAnalyser.searchCount') })
                     .then((response) => {
                         const retweets = response.data;
                         const retweetsUsers = retweets.map((retweet) => retweet.user.screen_name);
-                        retweetsUsers.forEach((retweetsUser) => users.push(retweetsUser));
-                    });
+                        retweetsUsers.forEach((retweetsUser) => result.users.push(retweetsUser));
+                    })
+                    .catch(console.error)
+                );
             });
 
+            return Promise.all(promises).catch(console.error);
+        })
+        .then(() => {
             console.log(`In the last ${config.get('hooks.botometerAnalyser.nbDay') > 1 ? `${config.get('hooks.botometerAnalyser.nbDay')} days` : 'day'}`);
             console.log('Number of tweets containing this search:', result.lastDayTweets.length);
             console.log('Number of retweets for tweets containing this search:', result.totalRetweetCount);
             console.log('Number of likes for tweets containing this search:', result.totalFavoriteCount);
+            console.log('Number of users (from tweets and retweets):', result.users.length);
 
-            debug('Users:', users);
-            console.log('Number of accounts:', users.length);
-            return users;
-        })
-        .then((users) => {
-            result.users = users;
-            return botometer.getScores(users);
+            return botometer.getScores(result.users);
         })
         .then((botometerScores) => {
             result.scores = botometerScores.scores;
@@ -86,9 +92,7 @@ function analyze(searchedTerm) {
                 },
                 imageUrl: imageFileName
             };
-        }).catch((e) => {
-            console.error(e);
-        });
+        }).catch(console.error);
 }
 
 module.exports = analyze;
