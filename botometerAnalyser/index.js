@@ -14,7 +14,7 @@ const T = new Twitter({
 
 function analyze(searchedTerm) {
 	const twitterParams = {
-		count: config.get('hooks.botometerAnalyser.searchCount'),
+		count: 100,
 		q: searchedTerm,
 	};
 
@@ -33,28 +33,29 @@ function analyze(searchedTerm) {
 			result.users = result.lastDayTweets.map(tweet => tweet.user.screen_name);
 			console.log('Number of users (only from search result):', result.users.length);
 
-			const promises = [];
-			result.lastDayTweets.forEach((tweet) => {
-				// if there are no retweets, nothing to do
-				if (!tweet.retweet_count) {
-					return;
-				}
+			// Do not analyse retweets because of Twitter API rate limits
+			// const promises = [];
+			// result.lastDayTweets.forEach((tweet) => {
+			// 	// if there are no retweets, nothing to do
+			// 	if (!(tweet.retweet_count || tweet.retweeted_status)) {
+			// 		return;
+			// 	}
 
-				// if this is a retweet, adds original tweet's user in the list
-				if (tweet.retweeted_status) {
-					result.users.push(tweet.retweeted_status.user.screen_name);
-				}
+			// 	// if this is a retweet, adds original tweet's user in the list
+			// 	if (tweet.retweeted_status) {
+			// 		result.users.push(tweet.retweeted_status.user.screen_name);
+			// 	}
 
-				promises.push(T.get('statuses/retweets/:id', { id: tweet.retweeted_status.id_str, count: config.get('hooks.botometerAnalyser.searchCount') })
-					.then((response) => {
-						const retweets = response.data;
-						const retweetsUsers = retweets.map(retweet => retweet.user.screen_name);
-						retweetsUsers.forEach(retweetsUser => result.users.push(retweetsUser));
-					})
-					.catch(console.error));
-			});
+			// 	promises.push(T.get('statuses/retweets/:id', { id: tweet.retweeted_status.id_str, count: 100 })
+			// 		.then((response) => {
+			// 			const retweets = response.data;
+			// 			const retweetsUsers = retweets.map(retweet => retweet.user.screen_name);
+			// 			retweetsUsers.forEach(retweetsUser => result.users.push(retweetsUser));
+			// 		})
+			// 		.catch(console.error));
+			// });
 
-			return Promise.all(promises).catch(console.error);
+			// return Promise.all(promises).catch(console.error);
 		})
 		.then(() => {
 			console.log(`In the last ${config.get('hooks.botometerAnalyser.nbDay') > 1 ? `${config.get('hooks.botometerAnalyser.nbDay')} days` : 'day'}`);
@@ -63,6 +64,10 @@ function analyze(searchedTerm) {
 			console.log('Number of likes for tweets containing this search:', result.totalFavoriteCount);
 			console.log('Number of users (from tweets and retweets):', result.users.length);
 
+			// Until it will be faster, we limit getting botometer score to the n first users
+			console.log(`Limit botometer score to ${config.get('hooks.botometerAnalyser.maxAccountToAnalyse')} first users`);
+			result.users = result.users.slice(0, config.get('hooks.botometerAnalyser.maxAccountToAnalyse'));
+			result.lastDayTweets = result.lastDayTweets.slice(0, config.get('hooks.botometerAnalyser.maxAccountToAnalyse'));
 			return botometer.getScores(result.users);
 		})
 		.then((botometerScores) => {

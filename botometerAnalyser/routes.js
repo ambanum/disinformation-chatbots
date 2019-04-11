@@ -30,8 +30,10 @@ router.get('/', async (req, res, next) => {
 		response_type: 'in_channel',
 		icon_url: botIconUrl,
 		username: botUsername,
-		text: `Roger! I'm analysing the probability that the accounts (100 max) that have tweeted "${search}" in the past week are robots.${
-			activeJobsCount ? '\n:warning: There is already an analyse running, your request will be processed later.' : '\nThis should take 40 minutes max.'}`
+		text: `
+Roger! I'm analysing the probability that the accounts (${config.get('hooks.botometerAnalyser.maxAccountToAnalyse')} max) that have tweeted **"${search}"** in the past week are robots.
+${activeJobsCount ? '\n:information_source: _There is already an analyse running, your request will be processed later._' : '\n_This should take 30 minutes max._'}
+`
 	});
 
 	await queue.add({
