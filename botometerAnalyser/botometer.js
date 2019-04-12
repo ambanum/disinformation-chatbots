@@ -41,20 +41,21 @@ function getScores(users = []) {
 		const uniqueUnscoredUsers = [...new Set(unscoredUsers)];
 
 		B.getBatchBotScores(uniqueUnscoredUsers, (data) => {
-			const freshUsersScores = data.map(d => ({
-				name: d.botometer.user.screen_name,
-				score: d.botometer.display_scores.universal
-			}));
-
-			freshUsersScores.forEach((userScore) => {
-				cache.addUserScore(userScore.name, userScore.score);
+			const freshUsersScores = {};
+			data.forEach((d) => {
+				freshUsersScores[d.botometer.user.screen_name] = d.botometer.display_scores.universal;
 			});
+
+			Object.keys(freshUsersScores).forEach((username) => {
+				cache.addUserScore(username, freshUsersScores[username]);
+			});
+
 			debug('Fresh users scores', freshUsersScores);
 
-			const allUsersScore = cachedUsersScore.concat(freshUsersScores);
-			allUsersScore.forEach((userScore) => {
-				cache.addUserScore(userScore.name, userScore.score);
-			});
+			const allUsersScore = cachedUsersScore.concat(unscoredUsers.map(name => ({
+				name,
+				score: freshUsersScores[name]
+			})));
 
 			const scores = allUsersScore.map(user => user.score);
 			const uniqueUsersScores = allUsersScore
