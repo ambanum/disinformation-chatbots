@@ -30,9 +30,7 @@ queue.on('completed', (job, result) => {
 				method: 'POST',
 				json: {
 					text: `@${job.data.requesterUsername} Sorry, we found no results on Twitter for the search "${job.data.search}"`,
-					response_type: 'in_channel',
-					username: job.data.botUsername,
-					icon_url: job.data.botIconUrl
+					response_type: 'in_channel'
 				},
 			});
 		}
@@ -43,8 +41,6 @@ queue.on('completed', (job, result) => {
 			json: {
 				text: `@${job.data.requesterUsername} Done!`,
 				response_type: 'in_channel',
-				username: job.data.botUsername,
-				icon_url: job.data.botIconUrl,
 				attachments: [
 					{
 						title: 'During the last week',

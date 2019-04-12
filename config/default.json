@@ -2,9 +2,7 @@
     "hooks": {
         "botometerAnalyser": {
             "mattermost": {
-                "token": "zywgpfknhpg7dm4gf9tpf75rsh",
-                "username": "botometer",
-                "icon": "https://botometer.iuni.iu.edu/assets/img/twitter-robot-bird.png"
+                "token": "zywgpfknhpg7dm4gf9tpf75rsh"
             },
             "minScoreBot": 3.8,
             "maxScoreHuman": 1,
