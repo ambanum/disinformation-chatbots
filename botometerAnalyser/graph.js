@@ -4,6 +4,22 @@ const uuidv1 = require('uuid/v1');
 
 const utils = require('./utils');
 
+function rangeLabel() {
+	let label = 0;
+
+	const result = [label];
+	const stepsCount = config.get('hooks.botometerAnalyser.maxScore') / config.get('hooks.botometerAnalyser.range');
+	let actualStep = 1;
+
+	while (actualStep <= stepsCount) {
+		label += config.get('hooks.botometerAnalyser.range');
+		result.push(label);
+		actualStep++;
+	}
+
+	return result;
+}
+
 function generateFromScores(usersScores, sharesScores) {
 	const options = {
 		type: 'line',
@@ -32,20 +48,20 @@ function generateFromScores(usersScores, sharesScores) {
 		},
 		options: {
 			plugins: {
-				beforeDraw: function (chart, easing) {
-					var ctx = chart.chart.ctx;
+				beforeDraw(chart) {
+					const { ctx } = chart.chart;
 					ctx.save();
-					ctx.fillStyle = "#ffffff";
+					ctx.fillStyle = '#ffffff';
 					ctx.fillRect(0, 0, chart.width, chart.height);
 					ctx.restore();
 				}
 			},
 			legend: {
-					display: true,
-					labels: {
-						fontColor: 'rgba(0, 0, 0, 0.95)',
-						fontSize: 14,
-					}
+				display: true,
+				labels: {
+					fontColor: 'rgba(0, 0, 0, 0.95)',
+					fontSize: 14,
+				}
 			},
 			scales: {
 				yAxes: [{
@@ -72,31 +88,15 @@ function generateFromScores(usersScores, sharesScores) {
 		}
 	};
 
-	var chartNode = new ChartjsNode(1000, 1000);
+	const chartNode = new ChartjsNode(1000, 1000);
 	return chartNode.drawChart(options)
-		.then((buffer) => {
+		.then(() => {
 			console.log();
 			const fileName = uuidv1();
 			console.log(`Writing distribution graph to ./public/images/botometerAnalyser/${fileName}.png`);
 			chartNode.writeImageToFile('image/png', `./public/images/botometerAnalyser/${fileName}.png`);
 			return fileName;
 		});
-}
-
-function rangeLabel() {
-	let label = 0;
-
-	const result = [label];
-	const stepsCount = config.get('hooks.botometerAnalyser.maxScore') / config.get('hooks.botometerAnalyser.range');
-	let actualStep = 1;
-
-	while (actualStep <= stepsCount) {
-		label += config.get('hooks.botometerAnalyser.range');
-		result.push(label);
-		actualStep++;
-	};
-
-	return result;
 }
 
 module.exports = {
