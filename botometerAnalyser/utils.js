@@ -1,16 +1,16 @@
 const config = require('config');
 
-function percentageBetweenValues(scores, minScore, maxScore) {
+function percentageBetweenValues(scores = [], minScore, maxScore) {
 	const total = scores.filter((score) => {
 		if (maxScore === config.get('hooks.botometerAnalyser.maxScore')) {
 			return score >= minScore;
 		}
 		return score >= minScore && score < maxScore;
 	}).length;
-	return Math.round(total / scores.length * 100);
+	return !total ? 0 : Math.round(total / scores.length * 100);
 }
 
-function percentages(scores) {
+function percentagesBotHuman(scores) {
 	const percentageBot = percentageBetweenValues(scores, config.get('hooks.botometerAnalyser.minScoreBot'), config.get('hooks.botometerAnalyser.maxScore'));
 	const percentageHuman = percentageBetweenValues(scores, config.get('hooks.botometerAnalyser.minScore'), config.get('hooks.botometerAnalyser.maxScoreHuman'));
 	return {
@@ -19,8 +19,8 @@ function percentages(scores) {
 	};
 }
 
-function percentageOfUserByScoreRange(scores) {
-	let stepMin = 0;
+function percentageOfScoreByRange(scores) {
+	let stepMin = config.get('hooks.botometerAnalyser.minScore');
 	let stepMax = config.get('hooks.botometerAnalyser.range');
 	const result = [];
 	while (stepMax <= config.get('hooks.botometerAnalyser.maxScore')) {
@@ -32,8 +32,25 @@ function percentageOfUserByScoreRange(scores) {
 	return result;
 }
 
+function rangeLabel() {
+	let label = 0;
+
+	const result = [label];
+	const stepsCount = config.get('hooks.botometerAnalyser.maxScore') / config.get('hooks.botometerAnalyser.range');
+	let actualStep = 1;
+
+	while (actualStep <= stepsCount) {
+		label += config.get('hooks.botometerAnalyser.range');
+		result.push(label);
+		actualStep++;
+	}
+
+	return result;
+}
+
 module.exports = {
-	percentages,
+	percentagesBotHuman,
 	percentageBetweenValues,
-	percentageOfUserByScoreRange,
+	percentageOfScoreByRange,
+	rangeLabel
 };

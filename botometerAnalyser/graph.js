@@ -1,33 +1,16 @@
-const config = require('config');
 const ChartjsNode = require('chartjs-node');
 const uuidv1 = require('uuid/v1');
 
 const utils = require('./utils');
 
-function rangeLabel() {
-	let label = 0;
-
-	const result = [label];
-	const stepsCount = config.get('hooks.botometerAnalyser.maxScore') / config.get('hooks.botometerAnalyser.range');
-	let actualStep = 1;
-
-	while (actualStep <= stepsCount) {
-		label += config.get('hooks.botometerAnalyser.range');
-		result.push(label);
-		actualStep++;
-	}
-
-	return result;
-}
-
-function generateFromScores(usersScores, sharesScores) {
+async function generateFromScores(usersScores, sharesScores) {
 	const options = {
 		type: 'line',
 		data: {
-			labels: rangeLabel(),
+			labels: utils.rangeLabel(),
 			datasets: [{
 				label: 'percentage of users by range',
-				data: utils.percentageOfUserByScoreRange(usersScores),
+				data: utils.percentageOfScoreByRange(usersScores),
 				backgroundColor: 'rgba(87, 181, 96, 0.3)',
 				borderColor: 'rgba(87, 181, 96, 1)',
 				// Hide points
@@ -37,7 +20,7 @@ function generateFromScores(usersScores, sharesScores) {
 			},
 			{
 				label: 'percentage of shares by range',
-				data: utils.percentageOfUserByScoreRange(sharesScores),
+				data: utils.percentageOfScoreByRange(sharesScores),
 				backgroundColor: 'rgba(101, 154, 206, 0.3)',
 				borderColor: 'rgba(101, 154, 206, 1.00)',
 				// Hide points
@@ -89,17 +72,15 @@ function generateFromScores(usersScores, sharesScores) {
 	};
 
 	const chartNode = new ChartjsNode(1000, 1000);
-	return chartNode.drawChart(options)
-		.then(() => {
-			console.log();
-			const fileName = uuidv1();
-			console.log(`Writing distribution graph to ./public/images/botometerAnalyser/${fileName}.png`);
-			chartNode.writeImageToFile('image/png', `./public/images/botometerAnalyser/${fileName}.png`);
-			return fileName;
-		});
+	await chartNode.drawChart(options);
+	const fileName = uuidv1();
+	const filePath = `./public/images/botometerAnalyser/${fileName}.png`;
+	console.log();
+	console.log(`Writing distribution graph to ${filePath}`);
+	chartNode.writeImageToFile('image/png', filePath);
+	return fileName;
 }
 
 module.exports = {
-	generateFromScores,
-	rangeLabel,
+	generateFromScores
 };
