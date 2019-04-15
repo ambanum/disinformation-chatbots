@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
 const botometerAnalyserRouter = require('./botometerAnalyser/routes');
+const sendToAnalysisRouter = require('./sendToAnalysis/routes');
 
 const app = express();
 
@@ -14,5 +15,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/botometer/', botometerAnalyserRouter);
+app.use('/sendToAnalysis/', sendToAnalysisRouter);
 
 module.exports = app;
