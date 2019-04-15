@@ -2,7 +2,7 @@ const config = require('config');
 const express = require('express');
 
 const router = express.Router();
-const queue = require('./queue');
+const { queue } = require('./queue');
 
 const mattermostToken = config.get('hooks.botometerAnalyser.mattermost.token');
 

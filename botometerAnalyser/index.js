@@ -12,7 +12,7 @@ const T = new Twitter({
 	access_token_secret: config.get('hooks.botometerAnalyser.twitter.access_token_secret')
 });
 
-function analyze(searchedTerm) {
+function analyse(searchedTerm) {
 	const twitterParams = {
 		count: 100,
 		q: searchedTerm,
@@ -97,4 +97,6 @@ function analyze(searchedTerm) {
 		.catch(console.error);
 }
 
-module.exports = analyze;
+module.exports = {
+	analyse
+};
