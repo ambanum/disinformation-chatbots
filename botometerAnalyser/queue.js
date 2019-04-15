@@ -3,13 +3,19 @@ const request = require('request-promise');
 const Bull = require('bull');
 const { analyse } = require('./index');
 
-const queue = new Bull('Botometer analysis', {
+const queueOptions = {
 	limiter: {
 		max: 1,
 		duration: 1000,
 		bounceBack: true,
 	}
-});
+};
+
+if (process.env.NODE_ENV === 'test') {
+	queueOptions.redis = { db: config.get('hooks.botometerAnalyser.redisDB') };
+}
+
+const queue = new Bull('Botometer analysis', queueOptions);
 
 queue.process(async (job) => {
 	console.log(`Botometer analyser: Running job for search "${job.data.search}" requested by "${job.data.requesterUsername}"`);
