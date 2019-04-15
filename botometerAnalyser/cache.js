@@ -8,10 +8,6 @@ const db = low(adapter);
 // Set some defaults (required if your JSON file is empty)
 db.defaults({ users: {} }).write();
 
-function addUser(userName) {
-	db.set(`users.${userName}`, null).write();
-}
-
 function addUserScore(userName, score) {
 	db.set(`users.${userName}.score`, score).write();
 }
@@ -21,7 +17,6 @@ function getUserScore(userName) {
 }
 
 module.exports = {
-	addUser,
 	addUserScore,
 	getUserScore,
 };
