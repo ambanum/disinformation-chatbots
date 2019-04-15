@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "test": "NODE_ENV=test mocha --recursive",
-    "test:debug": "NODE_ENV=test mocha --inspect-brk --recursive",
+    "test": "ALLOW_CONFIG_MUTATIONS=true NODE_ENV=test mocha --recursive",
+    "test:debug": "ALLOW_CONFIG_MUTATIONS=true NODE_ENV=test mocha --recursive --inspect-brk",
     "start": "node ./bin/www"
   },
   "dependencies": {

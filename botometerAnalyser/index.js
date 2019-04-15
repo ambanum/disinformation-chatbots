@@ -76,8 +76,8 @@ function analyze(searchedTerm) {
 			return graph.generateFromScores(botometerScores.uniqueUsersScores, botometerScores.scores);
 		})
 		.then((imageFileName) => {
-			const sharesPercentage = utils.percentages(result.scores);
-			const usersPercentage = utils.percentages(result.uniqueUsersScores);
+			const sharesPercentage = utils.percentagesBotHuman(result.scores);
+			const usersPercentage = utils.percentagesBotHuman(result.uniqueUsersScores);
 			return {
 				shares: {
 					total: result.lastDayTweets.length,
