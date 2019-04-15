@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "test": "ALLOW_CONFIG_MUTATIONS=true NODE_ENV=test mocha --recursive --exit",
-    "test:debug": "ALLOW_CONFIG_MUTATIONS=true NODE_ENV=test mocha --recursive --inspect-brk --exit",
+    "test": "ALLOW_CONFIG_MUTATIONS=true NODE_ENV=test mocha --file './test/helper.js' --recursive --exit",
+    "test:debug": "ALLOW_CONFIG_MUTATIONS=true NODE_ENV=test mocha --file './test/helper.js' --recursive --inspect-brk --exit",
     "start": "node ./bin/www"
   },
   "dependencies": {
