@@ -21,8 +21,22 @@ queue.process(async (job) => {
 });
 
 queue.on('completed', (job, result) => {
-	console.log(`Botometer analyser: Job completed for search "${job.data.search}" requested by "${job.data.requesterUsername}"`);
 	try {
+		console.log(`Botometer analyser: Job completed for search "${job.data.search}" requested by "${job.data.requesterUsername}"`);
+
+		if (!result.shares.total) {
+			return request({
+				url: job.data.responseUrl,
+				method: 'POST',
+				json: {
+					text: `@${job.data.requesterUsername} Sorry, we found no results on Twitter for the search "${job.data.search}"`,
+					response_type: 'in_channel',
+					username: job.data.botUsername,
+					icon_url: job.data.botIconUrl
+				},
+			});
+		}
+
 		request({
 			url: job.data.responseUrl,
 			method: 'POST',
