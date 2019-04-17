@@ -17,7 +17,7 @@ if (process.env.NODE_ENV === 'test') {
 
 const queue = new Bull('Botometer analysis', queueOptions);
 
-queue.process(async (job) => {
+queue.process((job) => {
 	console.log(`Botometer analyser: Running job for search "${job.data.search}" requested by "${job.data.requesterUsername}"`);
 	try {
 		return analyse(job.data.search);
@@ -30,7 +30,7 @@ function onJobCompleted(job, result) {
 	try {
 		console.log(`Botometer analyser: Job completed for search "${job.data.search}" requested by "${job.data.requesterUsername}"`);
 
-		if (!result.shares.total) {
+		if (!result) {
 			return request({
 				url: job.data.responseUrl,
 				method: 'POST',

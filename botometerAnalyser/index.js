@@ -12,91 +12,72 @@ const T = new Twitter({
 	access_token_secret: config.get('hooks.botometerAnalyser.twitter.access_token_secret')
 });
 
-function analyse(searchedTerm) {
-	const twitterParams = {
-		count: 100,
-		q: searchedTerm,
-	};
+function lastDaysTweets(tweets, nbDay) {
+	const now = new Date().getTime();
+	const before = now - (nbDay * 24 * 3600 * 1000);
+	return tweets.filter(tweet => before - new Date(tweet.created_at) < 0);
+}
+async function analyse(searchedTerm) {
+	try {
+		const twitterParams = {
+			count: 100,
+			q: searchedTerm,
+		};
 
-	const result = {};
+		// Get tweets containing the search param
+		const response = await T.get('search/tweets', twitterParams);
+		const tweets = response.data.statuses;
 
-	return T.get('search/tweets', twitterParams)
-		.then((response) => {
-			const tweets = response.data.statuses;
-			const now = new Date().getTime();
-			const before = now - (config.get('hooks.botometerAnalyser.nbDay') * 24 * 3600 * 1000);
-			result.lastDayTweets = tweets.filter(tweet => before - new Date(tweet.created_at) < 0);
-			result.totalRetweetCount = result.lastDayTweets.reduce((accumulator, currentValue) => accumulator + currentValue.retweet_count, 0);
-			result.totalFavoriteCount = result.lastDayTweets.reduce((accumulator, currentValue) => accumulator + currentValue.favorite_count, 0);
-		})
-		.then(() => {
-			result.users = result.lastDayTweets.map(tweet => tweet.user.screen_name);
-			console.log('Number of users (only from search result):', result.users.length);
+		// If there is no search results, nothing to do
+		if (!tweets.length) {
+			console.log(`No results found on Twitter for the search ${searchedTerm}`);
+			return null;
+		}
 
-			// Do not analyse retweets because of Twitter API rate limits
-			// const promises = [];
-			// result.lastDayTweets.forEach((tweet) => {
-			// 	// if there are no retweets, nothing to do
-			// 	if (!(tweet.retweet_count || tweet.retweeted_status)) {
-			// 		return;
-			// 	}
+		// Filter tweets to keep only the recents ones, according to the config
+		const nbDay = config.get('hooks.botometerAnalyser.nbDay');
+		let filteredTweets = lastDaysTweets(tweets, nbDay);
+		let users = filteredTweets.map(tweet => tweet.user.screen_name);
 
-			// 	// if this is a retweet, adds original tweet's user in the list
-			// 	if (tweet.retweeted_status) {
-			// 		result.users.push(tweet.retweeted_status.user.screen_name);
-			// 	}
+		// Until it will be faster, we limit getting botometer score to the n first users
+		const maxAccountToAnalyse = config.get('hooks.botometerAnalyser.maxAccountToAnalyse');
+		console.log(`Limit botometer score to ${maxAccountToAnalyse} first users`);
+		users = users.slice(0, maxAccountToAnalyse);
+		filteredTweets = filteredTweets.slice(0, maxAccountToAnalyse);
 
-			// 	promises.push(T.get('statuses/retweets/:id', { id: tweet.retweeted_status.id_str, count: 100 })
-			// 		.then((response) => {
-			// 			const retweets = response.data;
-			// 			const retweetsUsers = retweets.map(retweet => retweet.user.screen_name);
-			// 			retweetsUsers.forEach(retweetsUser => result.users.push(retweetsUser));
-			// 		})
-			// 		.catch(console.error));
-			// });
+		// Get botometer scores
+		const { scores, uniqueUsersScores } = await botometer.getScores(users);
+		const sharesPercentage = utils.percentagesBotHuman(scores);
+		const usersPercentage = utils.percentagesBotHuman(uniqueUsersScores);
 
-			// return Promise.all(promises).catch(console.error);
-		})
-		.then(() => {
-			console.log(`In the last ${config.get('hooks.botometerAnalyser.nbDay') > 1 ? `${config.get('hooks.botometerAnalyser.nbDay')} days` : 'day'}`);
-			console.log('Number of tweets containing this search:', result.lastDayTweets.length);
-			console.log('Number of retweets for tweets containing this search:', result.totalRetweetCount);
-			console.log('Number of likes for tweets containing this search:', result.totalFavoriteCount);
-			console.log('Number of users (from tweets and retweets):', result.users.length);
+		console.log(`In the last ${nbDay > 1 ? `${nbDay} days` : 'day'}`);
+		console.log('Number of tweets containing this search:', filteredTweets.length);
+		console.log('Number of users:', users.length);
 
-			// Until it will be faster, we limit getting botometer score to the n first users
-			console.log(`Limit botometer score to ${config.get('hooks.botometerAnalyser.maxAccountToAnalyse')} first users`);
-			result.users = result.users.slice(0, config.get('hooks.botometerAnalyser.maxAccountToAnalyse'));
-			result.lastDayTweets = result.lastDayTweets.slice(0, config.get('hooks.botometerAnalyser.maxAccountToAnalyse'));
-			return botometer.getScores(result.users);
-		})
-		.then((botometerScores) => {
-			result.scores = botometerScores.scores;
-			result.uniqueUsersScores = botometerScores.uniqueUsersScores;
-			return graph.generateFromScores(botometerScores.uniqueUsersScores, botometerScores.scores);
-		})
-		.then((imageFileName) => {
-			const sharesPercentage = utils.percentagesBotHuman(result.scores);
-			const usersPercentage = utils.percentagesBotHuman(result.uniqueUsersScores);
-			return {
-				shares: {
-					total: result.lastDayTweets.length,
-					percentageUnknown: 100 - (sharesPercentage.percentageBot + sharesPercentage.percentageHuman),
-					percentageBot: sharesPercentage.percentageBot,
-					percentageHuman: sharesPercentage.percentageHuman,
-				},
-				users: {
-					total: result.users.length,
-					percentageUnknown: 100 - (usersPercentage.percentageBot + usersPercentage.percentageHuman),
-					percentageBot: usersPercentage.percentageBot,
-					percentageHuman: usersPercentage.percentageHuman,
-				},
-				imageUrl: imageFileName
-			};
-		})
-		.catch(console.error);
+		// Generate graph
+		const imageFileName = await graph.generateFromScores(uniqueUsersScores, scores);
+
+		return {
+			shares: {
+				total: filteredTweets.length,
+				percentageUnknown: 100 - (sharesPercentage.percentageBot + sharesPercentage.percentageHuman),
+				percentageBot: sharesPercentage.percentageBot,
+				percentageHuman: sharesPercentage.percentageHuman,
+			},
+			users: {
+				total: users.length,
+				percentageUnknown: 100 - (usersPercentage.percentageBot + usersPercentage.percentageHuman),
+				percentageBot: usersPercentage.percentageBot,
+				percentageHuman: usersPercentage.percentageHuman,
+			},
+			imageUrl: imageFileName
+		};
+	} catch (e) {
+		console.error(e);
+	}
 }
 
 module.exports = {
-	analyse
+	analyse,
+	lastDaysTweets
 };
