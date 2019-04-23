@@ -1,10 +1,17 @@
 const config = require('config');
 const express = require('express');
+const Arena = require('bull-arena');
 
 const router = express.Router();
 const { queue } = require('./queue');
 
 const mattermostToken = config.get('hooks.botometerAnalyser.mattermost.token');
+
+Arena({
+	queues: [
+		{ name: 'Botometer: getScore', hostId: 'Botometer: getScore' }
+	]
+});
 
 router.get('/', async (req, res, next) => {
 	const givenToken = req.query.token;
