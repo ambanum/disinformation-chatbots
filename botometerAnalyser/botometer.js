@@ -1,7 +1,12 @@
-const debug = require('debug')('index');
 const config = require('config');
 const Botometer = require('node-botometer');
-const cache = require('./cache.js');
+const Bull = require('bull');
+const d = require('debug');
+
+const cache = require('./cache');
+
+const debug = d('BotometerAnalyser:botometer:debug');
+const logError = d('BotometerAnalyser:botometer:error');
 
 const B = new Botometer({
 	consumer_key: config.get('hooks.botometerAnalyser.botometer.consumer_key'),
@@ -12,69 +17,90 @@ const B = new Botometer({
 	mashape_key: config.get('hooks.botometerAnalyser.botometer.mashape_key'),
 	rate_limit: 0,
 	log_progress: true,
-	include_user: false,
+	include_user: true,
 	include_timeline: false,
 	include_mentions: false
 });
 
-// TODO: move to higher level cache managment
-function getScores(users = []) {
-	return new Promise((resolve) => {
-		const cachedUsersScore = [];
-		const unscoredUsers = [];
+const queueOptions = {
+	limiter: {
+		max: 1,
+		duration: 1000,
+		bounceBack: true,
+	},
+	defaultJobOptions: {
+		removeOnComplete: true
+	}
+};
 
-		users.forEach((user) => {
-			const cachedUserScore = cache.getUserScore(user);
-			if (typeof cachedUserScore !== 'undefined') {
-				cachedUsersScore.push({
-					name: user,
-					score: cachedUserScore
-				});
-			} else {
-				unscoredUsers.push(user);
-			}
-		});
-		debug('Cached users scores', cachedUsersScore);
-		debug('Unscored users', unscoredUsers);
+if (process.env.NODE_ENV === 'test') {
+	debug('Queue set for TEST env');
+	queueOptions.redis = { db: config.get('hooks.botometerAnalyser.redisDB') };
+}
 
-		// Remove duplicate for botometer API request
-		const uniqueUnscoredUsers = [...new Set(unscoredUsers)];
+const queue = new Bull('Botometer: getScore', queueOptions);
 
-		B.getBatchBotScores(uniqueUnscoredUsers, (data) => {
-			const freshUsersScores = {};
-			data.forEach((d) => {
-				freshUsersScores[d.botometer.user.screen_name] = d.botometer.display_scores.universal;
-			});
+function getBotScore(userScreenName) {
+	try {
+		return B.getBotScore(userScreenName);
+	} catch (error) {
+		logError(error);
+		return null;
+	}
+}
 
-			Object.keys(freshUsersScores).forEach((username) => {
-				cache.addUserScore(username, freshUsersScores[username]);
-			});
+queue.process(async (job) => {
+	try {
+		const { screenName } = job.data.user;
+		debug('Start job', screenName);
+		return getBotScore(screenName);
+	} catch (error) {
+		logError(error);
+		return null;
+	}
+});
 
-			debug('Fresh users scores', freshUsersScores);
+async function scheduleUsersAnalysis({
+	search, responseUrl, requesterUsername, users, unscoredUsers
+}) {
+	const promises = [];
+	const startTimestamp = new Date().getTime();
+	unscoredUsers.forEach((user) => {
+		// When there are multiple tweets from the same user, it's possible that its score have already been got.
+		if (cache.getUserById(user.id)) {
+			return;
+		}
 
-			const allUsersScore = cachedUsersScore.concat(unscoredUsers.map(name => ({
-				name,
-				score: freshUsersScores[name]
-			})));
-
-			const scores = allUsersScore.map(user => user.score);
-			const uniqueUsersScores = allUsersScore
-				.filter((userScore, index, self) => (
-					index === self.findIndex(uS => uS.name === userScore.name)))
-				.map(user => user.score);
-
-			debug('scores', scores);
-			debug('uniqueUsersScores', uniqueUsersScores);
-
-			resolve({
-				scores,
-				uniqueUsersScores
-			});
-		});
+		promises.push(queue.add({
+			search,
+			responseUrl,
+			requesterUsername,
+			users,
+			unscoredUsers,
+			user,
+			startTimestamp
+		}, {
+			// Make theses Botometer jobs prioritary
+			priority: 1
+		}));
 	});
+
+	const jobs = await Promise.all(promises);
+	// We consider the timeout started since the startTimestamp date
+	// so remove the elapsed time between startTimestamp and now from the timeout
+	const durationTimeout = config.get('hooks.botometerAnalyser.timeout') - (new Date() - startTimestamp);
+	setTimeout(() => {
+		// Remove all jobs after timeout expired
+		jobs.forEach((job) => {
+			debug('Remove job', job.id, job.data.user.screenName, job.timestamp);
+			job.remove().catch(logError);
+		});
+	}, durationTimeout);
 }
 
 module.exports = {
-	getScores,
-	B
+	getBotScore,
+	queue,
+	B,
+	scheduleUsersAnalysis
 };

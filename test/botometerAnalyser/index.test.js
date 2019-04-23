@@ -1,20 +1,175 @@
 const { expect } = require('chai');
+const sinon = require('sinon');
+const cache = require('../../botometerAnalyser/cache');
 const index = require('../../botometerAnalyser/index');
+const botometer = require('../../botometerAnalyser/botometer');
+const searchResult = require('./fixtures/twitter/search');
+
+const usersWithoutDuplicates = [
+	{ screenName: 'user1', id: '1' },
+	{ screenName: 'user2', id: '2' },
+	{ screenName: 'user3', id: '3' },
+	{ screenName: 'user4', id: '4' },
+	{ screenName: 'user5', id: '5' }
+];
+
+const usersWithDuplicates = [...usersWithoutDuplicates, usersWithoutDuplicates[2]];
+
+const scores = {
+	user1: 0.5,
+	user2: 0.8,
+	user3: 2,
+	user4: 4,
+	user5: 4.5,
+};
 
 describe('BotometerAnalyser index', () => {
-	describe('#lastDaysTweets', () => {
-		const now = new Date();
-		const tweets = [
-			{ created_at: new Date(now) },
-			{ created_at: new Date(now.setDate(now.getDate() - 1)) },
-			{ created_at: new Date(now.setDate(now.getDate() - 1)) },
-			{ created_at: new Date(now.setDate(now.getDate() - 1)) },
-			{ created_at: new Date(now.setDate(now.getDate() - 1)) },
-			{ created_at: new Date(now.setDate(now.getDate() - 1)) },
-		];
+	before(() => {
+		usersWithoutDuplicates.forEach(user => cache.addUser(user.screenName, user.id, scores[user.screenName]));
+	});
 
-		it('should return tweets of the specified last days', () => {
-			expect(index.lastDaysTweets(tweets, 2)).to.deep.equal(tweets.slice(0, 2));
+	describe('#analyseUsersScores', () => {
+		context('without arguments', () => {
+			it('should return a proper empty result object', () => index.analyseUsersScores().then((result) => {
+				expect(result).to.deep.equal({
+					shares: {
+						total: 0,
+						percentageUnknown: 100,
+						percentageBot: 0,
+						percentageHuman: 0,
+					},
+					users: {
+						total: 0,
+						percentageUnknown: 100,
+						percentageBot: 0,
+						percentageHuman: 0,
+					},
+					imageUrl: undefined
+				});
+			}));
+		});
+
+		context('with an array of uniqueUsers', () => {
+			context('when each users tweets only one time', () => {
+				let result;
+				before(async () => {
+					result = await index.analyseUsersScores(usersWithoutDuplicates);
+				});
+				it('should return a proper shares analysis', () => {
+					expect(result.shares).to.deep.equal({
+						total: 5,
+						percentageUnknown: 20,
+						percentageBot: 40,
+						percentageHuman: 40,
+					});
+				});
+				it('should return a proper users analysis', () => {
+					expect(result.users).to.deep.equal({
+						total: 5,
+						percentageUnknown: 20,
+						percentageBot: 40,
+						percentageHuman: 40,
+					});
+				});
+				it('should return an image filename', () => {
+					expect(result.imageUrl).to.be.a.string;
+				});
+			});
+
+			context('when at least a user tweets multiple times', () => {
+				let result;
+				before(async () => {
+					result = await index.analyseUsersScores(usersWithDuplicates);
+				});
+				it('should return a proper shares analysis', () => {
+					expect(result.shares).to.deep.equal({
+						total: 6,
+						percentageUnknown: 34,
+						percentageBot: 33,
+						percentageHuman: 33,
+					});
+				});
+				it('should return a proper users analysis', () => {
+					expect(result.users).to.deep.equal({
+						total: 5,
+						percentageUnknown: 20,
+						percentageBot: 40,
+						percentageHuman: 40,
+					});
+				});
+				it('should return an image filename', () => {
+					expect(result.imageUrl).to.be.a.string;
+				});
+			});
+		});
+	});
+
+	describe('#onTwitterSearchCompleted', () => {
+		const stubs = {};
+		before(async () => {
+			stubs.scheduleUsersAnalysis = sinon.stub(botometer, 'scheduleUsersAnalysis');
+			await index.onTwitterSearchCompleted({
+				data: {
+					search: 'test',
+					responseUrl: 'http://mattermost-server.com',
+					requesterUsername: 'ndpnt'
+				}
+			}, { data: searchResult });
+		});
+
+		after(() => {
+			stubs.scheduleUsersAnalysis.restore();
+		})
+		it('should schedule a job with proper params', () => {
+			expect(stubs.scheduleUsersAnalysis.getCall(0).args[0]).to.deep.equal({
+				search: 'test',
+				responseUrl: 'http://mattermost-server.com',
+				requesterUsername: 'ndpnt',
+				users: [
+					{
+						screenName: 'NASA',
+						id: '11348282',
+					},
+					{
+						screenName: 'NASA',
+						id: '11348282',
+					},
+					{
+						screenName: 'NASA',
+						id: '11348282',
+					},
+					{
+						screenName: 'Astro_Kanai',
+						id: '842625693733203968',
+					},
+					{
+						screenName: 'NASAJPL',
+						id: '19802879',
+					}
+				],
+				unscoredUsers: [
+					{
+						screenName: 'NASA',
+						id: '11348282',
+					},
+					{
+						screenName: 'NASA',
+						id: '11348282',
+					},
+					{
+						screenName: 'NASA',
+						id: '11348282',
+					},
+					{
+						screenName: 'Astro_Kanai',
+						id: '842625693733203968',
+					},
+					{
+						screenName: 'NASAJPL',
+						id: '19802879',
+					}
+				]
+			});
 		});
 	});
 });

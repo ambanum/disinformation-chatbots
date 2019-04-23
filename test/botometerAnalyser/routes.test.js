@@ -2,8 +2,18 @@ const config = require('config');
 const { expect } = require('chai');
 const request = require('supertest');
 const sinon = require('sinon');
+const nock = require('nock');
+
 const app = require('../../app');
-const { queue } = require('../../botometerAnalyser/queue');
+const botometer = require('../../botometerAnalyser/botometer');
+
+const searchResult = require('./fixtures/twitter/search');
+
+nock('https://api.twitter.com/1.1')
+	.persist()
+	.get('/search/tweets.json')
+	.query(true)
+	.reply(200, searchResult);
 
 const stubs = {};
 
@@ -12,7 +22,7 @@ describe('BotometerAnalyser routes', () => {
 		context('with no token provided', () => {
 			let response;
 			before(async () => {
-				stubs.add = sinon.stub(queue, 'add');
+				stubs.add = sinon.stub(botometer.queue, 'add');
 				response = await request(app)
 					.get('/botometer/');
 			});
@@ -37,7 +47,7 @@ describe('BotometerAnalyser routes', () => {
 		context('with invalid token', () => {
 			let response;
 			before(async () => {
-				stubs.add = sinon.stub(queue, 'add');
+				stubs.add = sinon.stub(botometer.queue, 'add');
 				response = await request(app)
 					.get('/botometer/')
 					.query({ token: 'value' });
@@ -86,7 +96,7 @@ describe('BotometerAnalyser routes', () => {
 				let response;
 				const searchTerm = 'test';
 				before(async () => {
-					stubs.add = sinon.stub(queue, 'add');
+					stubs.scheduleUsersAnalysis = sinon.stub(botometer, 'scheduleUsersAnalysis');
 					response = await request(app)
 						.get('/botometer/')
 						.query({
@@ -98,7 +108,7 @@ describe('BotometerAnalyser routes', () => {
 				});
 
 				after(() => {
-					stubs.add.restore();
+					stubs.scheduleUsersAnalysis.restore();
 				});
 
 				it('should respond with 200', () => {
@@ -110,29 +120,21 @@ describe('BotometerAnalyser routes', () => {
 				});
 
 				it('should respond with the max number of account in the text', () => {
-					expect(response.body.text).to.contain(`${config.get('hooks.botometerAnalyser.maxAccountToAnalyse')} max`);
+					expect(response.body.text).to.contain('100 max');
 				});
 
-				it('should add a job and only one to the queue', () => {
-					expect(stubs.add.calledOnce).to.be.true;
-				});
-
-				it('should add a job with proper params', () => {
-					expect(stubs.add.calledWith({
-						search: searchTerm,
-						responseUrl: 'response_url',
-						requesterUsername: 'user_name'
-					})).to.be.true;
+				it('should add jobs to the queue', () => {
+					expect(stubs.scheduleUsersAnalysis.calledOnce).to.be.true;
 				});
 			});
 
-			context('when there is already an analyse running', () => {
+			context('when there is already an analysis running', () => {
 				let response;
 				const searchTerm = 'test';
 
 				before(async () => {
-					stubs.add = sinon.stub(queue, 'add');
-					stubs.getActiveCount = sinon.stub(queue, 'getActiveCount').returns('1');
+					stubs.scheduleUsersAnalysis = sinon.stub(botometer, 'scheduleUsersAnalysis');
+					stubs.getActiveCount = sinon.stub(botometer.queue, 'getActiveCount').returns('1');
 					await request(app)
 						.get('/botometer/')
 						.query({
@@ -148,7 +150,7 @@ describe('BotometerAnalyser routes', () => {
 				});
 
 				after(() => {
-					stubs.add.restore();
+					stubs.scheduleUsersAnalysis.restore();
 					stubs.getActiveCount.restore();
 				});
 
@@ -161,15 +163,15 @@ describe('BotometerAnalyser routes', () => {
 				});
 
 				it('should respond with the max number of account in the text', () => {
-					expect(response.body.text).to.contain(`${config.get('hooks.botometerAnalyser.maxAccountToAnalyse')} max`);
+					expect(response.body.text).to.contain('100 max');
 				});
 
-				it('should respond with the information that an analyse is already running in the text', () => {
-					expect(response.body.text).to.contain('already an analyse running');
+				it('should respond with the information that an analysis is already running in the text', () => {
+					expect(response.body.text).to.contain('already an analysis running');
 				});
 
-				it('should add a second job to the queue', () => {
-					expect(stubs.add.calledTwice).to.be.true;
+				it('should add schedule a second users analysis', () => {
+					expect(stubs.scheduleUsersAnalysis.callCount).to.equal(2);
 				});
 			});
 		});

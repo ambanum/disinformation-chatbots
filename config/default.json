@@ -10,8 +10,8 @@
             "minScore": 0,
             "range": 0.5,
             "nbDay": 7,
-            "maxAccountToAnalyse": 75,
 			"dbFileName": "botometerAnalyser_cache.json",
+			"timeout": 1500000,
 			"twitter": {
 				"rateLimits": {
 					"TIME_WINDOW": 900000,
