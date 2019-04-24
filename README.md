@@ -55,3 +55,7 @@ In order to start a server that responds to incoming requests from a Mattermost 
 ```
     npm start
 ```
+
+# License
+
+EUPL v1.2: akin to an AGPL, but more readable and translated and legally binding into all languages of the EU. [Recap](https://choosealicense.com/licenses/eupl-1.2/).
