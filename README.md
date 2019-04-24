@@ -1,4 +1,4 @@
-Integration server to add webhooks and slash commands to https://desinfo.quaidorsay.fr's Mattermost
+Chatbots that help to fight disinformation on Mattermost.
 
 # Integrations
 
