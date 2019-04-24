@@ -2,7 +2,7 @@ Integration server to add webhooks and slash commands to https://desinfo.quaidor
 
 # Integrations
 
-- ## BotometerAnalyser
+## BotometerAnalyser
 
 Assesses the distribution of robots-like accounts sharing specific content on Twitter. It uses [Botometer](https://botometer.iuni.iu.edu) but instead of analysing one account, it analyses all accounts that have shared specific content.
 
