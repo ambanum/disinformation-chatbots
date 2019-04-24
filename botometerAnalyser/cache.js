@@ -6,22 +6,36 @@ const adapter = new FileSync(config.get('hooks.botometerAnalyser.dbFileName'));
 const db = low(adapter);
 
 // Set some defaults (required if your JSON file is empty)
-db.defaults({ users: {} }).write();
+db.defaults({ users: [] }).write();
 
-function addUser(userName) {
-	db.set(`users.${userName}`, null).write();
+function addUser(screenName, id, score) {
+	const alreadyExists = db.get('users').find({ id }).value();
+	if (alreadyExists) {
+		db.get('users')
+			.find({ id })
+			.assign({ screenName, score })
+			.write();
+	} else {
+		db.get('users')
+			.push({ id, screenName, score })
+			.write();
+	}
 }
 
-function addUserScore(userName, score) {
-	db.set(`users.${userName}.score`, score).write();
+function getUserByName(screenName) {
+	return db.get('users')
+		.find({ screenName })
+		.value();
 }
 
-function getUserScore(userName) {
-	return db.get(`users.${userName}.score`).value();
+function getUserById(id) {
+	return db.get('users')
+		.find({ id })
+		.value();
 }
 
 module.exports = {
 	addUser,
-	addUserScore,
-	getUserScore,
+	getUserByName,
+	getUserById
 };

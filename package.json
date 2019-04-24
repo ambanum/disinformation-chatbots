@@ -3,10 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "test": "ALLOW_CONFIG_MUTATIONS=true NODE_ENV=test mocha --file './test/helper.js' --recursive --exit",
+    "test:debug": "ALLOW_CONFIG_MUTATIONS=true NODE_ENV=test mocha --file './test/helper.js' --recursive --inspect-brk --exit",
     "start": "node ./bin/www"
   },
   "dependencies": {
     "bull": "^3.7.0",
+    "bull-arena": "^2.6.2",
     "chart.js": "^2.8.0",
     "chartjs-node": "^1.7.1",
     "config": "^3.0.1",
@@ -23,9 +26,16 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-chai-friendly": "^0.4.1",
-    "eslint-plugin-import": "^2.16.0"
+    "eslint-plugin-import": "^2.16.0",
+    "looks-same": "^7.2.0",
+    "mocha": "^6.1.2",
+    "nock": "^10.0.6",
+    "redis": "^2.8.0",
+    "sinon": "^7.3.1",
+    "supertest": "^4.0.2"
   }
 }

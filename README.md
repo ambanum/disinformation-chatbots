@@ -1,5 +1,17 @@
 
-Integration server to add incoming and outgoing webhooks and slash commands to https://desinfo.quaidorsay.fr's Mattermost
+Integration server to add webhooks and slash commands to https://desinfo.quaidorsay.fr's Mattermost
+
+# Integrations
+
+- ## BotometerAnalyser
+
+Assesses the distribution of robots' like accounts sharing specific content on Twitter. It uses [Botometer](https://botometer.iuni.iu.edu) but instead of analysing one account, it analyses a bunch of accounts related to a subject.
+
+This integration is called, through Mattermost as a Slash command, with a search term and returns a distribution about the probability that Twitter's accounts who have tweet the search term are robots.
+As we only use the Twitter Standard search API, the search is made against a sampling of recent Tweets published in the past 7 days with a mix between recent and popular content.
+
+An exemple of result in Mattermost where a slash command is configured to be used like this `/botometer [search term]`:
+![An exemple of result in Mattermost](Result%20example.png?raw=true)
 
 # Installation
 
@@ -37,7 +49,7 @@ Configure each hooks in the proper environment file, for example in `production.
 ```
 # Usage
 
-Run the server
+As it is designed to receive webhooks or slash commands, a server is needed to accepts incoming request from a Mattermost server and respond to it, so run it like this :
 
 ```
     npm start

@@ -2,9 +2,7 @@
     "hooks": {
         "botometerAnalyser": {
             "mattermost": {
-                "token": "zywgpfknhpg7dm4gf9tpf75rsh",
-                "username": "botometer",
-                "icon": "https://botometer.iuni.iu.edu/assets/img/twitter-robot-bird.png"
+                "token": "zywgpfknhpg7dm4gf9tpf75rsh"
             },
             "minScoreBot": 3.8,
             "maxScoreHuman": 1,
@@ -12,8 +10,16 @@
             "minScore": 0,
             "range": 0.5,
             "nbDay": 7,
-            "maxAccountToAnalyse": 75,
-            "dbFileName": "botometerAnalyser_cache.json"
+			"dbFileName": "botometerAnalyser_cache.json",
+			"timeout": 1500000,
+			"twitter": {
+				"rateLimits": {
+					"TIME_WINDOW": 900000,
+					"USERS_SHOW": 900,
+					"STATUSES_RETWEETERS_IDS": 300,
+					"SEARCH_TWEETS": 450
+				}
+			}
         }
     }
 }
