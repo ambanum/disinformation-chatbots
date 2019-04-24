@@ -48,6 +48,8 @@ Configure each hook in the proper environment file, for example in `production.j
 }
 ```
 
+`hooks.domain`: Base URL used to make distribution graphs available.
+
 # Usage
 
 In order to start a server that responds to incoming requests from a Mattermost instance:
