@@ -23,7 +23,7 @@ async function onTwitterSearchCompleted(job, result) {
 				url: responseUrl,
 				method: 'POST',
 				json: {
-					text: `@${requesterUsername} Sorry, we found no results on Twitter for the search "${search}"`,
+					text: `@${requesterUsername} Nobody shared "${search}" on Twitter in the last 7 days`,
 					response_type: 'in_channel'
 				},
 			});
@@ -123,7 +123,7 @@ botometer.queue.on('completed', async (job, botometerScore) => {
 					response_type: 'in_channel',
 					attachments: [
 						{
-							title: 'During the last week',
+							title: 'During the last 7 days',
 							fields: [
 								{
 									short: false,
