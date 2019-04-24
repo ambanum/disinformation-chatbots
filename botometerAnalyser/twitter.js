@@ -39,7 +39,72 @@ searchQueue.process(async (job) => {
 	}
 });
 
+const retweetersIdsQueueOptions = {
+	limiter: {
+		max: config.get('hooks.botometerAnalyser.twitter.rateLimits.STATUSES_RETWEETERS_IDS'),
+		duration: config.get('hooks.botometerAnalyser.twitter.rateLimits.TIME_WINDOW')
+	},
+	defaultJobOptions: {
+		removeOnComplete: true
+	}
+};
+if (process.env.NODE_ENV === 'test') {
+	retweetersIdsQueueOptions.redis = { db: 1 };
+}
+const retweetersIdsQueue = new Bull('Twitter: GET statuses/retweeters/ids', retweetersIdsQueueOptions);
+
+function getRetweetersIds(tweetId) {
+	const twitterParams = {
+		id: tweetId,
+		count: 100,
+		stringify_ids: true,
+	};
+	return T.get('statuses/retweeters/ids', twitterParams);
+}
+
+retweetersIdsQueue.process(async (job) => {
+	try {
+		return getRetweetersIds(job.data.id);
+	} catch (e) {
+		console.error(e);
+	}
+});
+
+const getUserQueueOptions = {
+	limiter: {
+		max: config.get('hooks.botometerAnalyser.twitter.rateLimits.USERS_SHOW'),
+		duration: config.get('hooks.botometerAnalyser.twitter.rateLimits.TIME_WINDOW')
+	},
+	defaultJobOptions: {
+		removeOnComplete: true
+	}
+};
+if (process.env.NODE_ENV === 'test') {
+	getUserQueueOptions.redis = { db: 1 };
+}
+const getUserQueue = new Bull('Twitter: GET users/show', getUserQueueOptions);
+
+function getUser(userId) {
+	const twitterParams = {
+		user_id: userId,
+		include_entities: false
+	};
+	return T.get('users/show', twitterParams);
+}
+
+getUserQueue.process(async (job) => {
+	try {
+		return getUser(job.data.userId);
+	} catch (e) {
+		console.error(e);
+	}
+});
+
 module.exports = {
 	search,
 	searchQueue,
+	getRetweetersIds,
+	retweetersIdsQueue,
+	getUser,
+	getUserQueue,
 };

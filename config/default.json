@@ -15,6 +15,8 @@
 			"twitter": {
 				"rateLimits": {
 					"TIME_WINDOW": 900000,
+					"USERS_SHOW": 900,
+					"STATUSES_RETWEETERS_IDS": 300,
 					"SEARCH_TWEETS": 450
 				}
 			}
