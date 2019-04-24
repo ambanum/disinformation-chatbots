@@ -23,7 +23,7 @@ async function onTwitterSearchCompleted(job, result) {
 				url: responseUrl,
 				method: 'POST',
 				json: {
-					text: `@${requesterUsername} Sorry, we found no results on Twitter for the search "${search}"`,
+					text: `@${requesterUsername} Nobody shared "${search}" on Twitter in the last 7 days`,
 					response_type: 'in_channel'
 				},
 			});
@@ -123,17 +123,17 @@ botometer.queue.on('completed', async (job, botometerScore) => {
 					response_type: 'in_channel',
 					attachments: [
 						{
-							title: 'During the last week',
+							title: 'During the last 7 days',
 							fields: [
 								{
 									short: false,
 									title: `On the latest ${result.shares.total} shares of "${search}":`,
-									value: `**${result.shares.percentageBot}%** have a high probability to be made by bots\n**${result.shares.percentageHuman}%** have a high probability to be made by humans\nFor the **${result.shares.percentageUnknown}%** others it's difficult to say`
+									value: `**${result.shares.percentageBot}%** have a high probability to be made by bots\n**${result.shares.percentageHuman}%** have a high probability to be made by humans\nFor the remaining **${result.shares.percentageUnknown}%** it's difficult to say`
 								},
 								{
 									short: false,
-									title: `On the ${result.users.total} users that have shared "${search}" lately:`,
-									value: `**${result.users.percentageBot}%** have a high probability to be made by bots\n**${result.users.percentageHuman}%** have a high probability to be made by humans\nFor the **${result.users.percentageUnknown}%** others it's difficult to say`
+									title: `On the ${result.users.total} users who have written content that contains "${search}":`,
+									value: `**${result.users.percentageBot}%** have a high probability to be bots\n**${result.users.percentageHuman}%** have a high probability to be humans\nFor the remaining **${result.users.percentageUnknown}%** it's difficult to say`
 								},
 							],
 						},

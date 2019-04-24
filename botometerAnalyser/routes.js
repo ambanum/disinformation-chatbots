@@ -40,8 +40,8 @@ router.get('/', async (req, res, next) => {
 	res.json({
 		response_type: 'in_channel',
 		text: `
-Roger! I'm analysing the probability that the accounts (100 max) that have tweeted **"${search}"** in the past week are robots.
-${activeJobsCount ? '\n:information_source: _There is already an analysis running, your request will be processed later._' : '\n_This should take 30 minutes max._'}
+Roger! I'm analysing the probability that the accounts that have tweeted **"${search}"** in the last 7 days are robots.
+${activeJobsCount ? '\n:mantelpiece_clock: _I’m already running an analysis, I will search for yours as soon as possible._' : '\n_In order to limit that search to 30 minutes, we will stop at 100 accounts max._'}
 `
 	});
 });

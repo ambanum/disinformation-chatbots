@@ -1,17 +1,17 @@
-
-Integration server to add webhooks and slash commands to https://desinfo.quaidorsay.fr's Mattermost
+Chatbots that help to fight disinformation on Mattermost.
 
 # Integrations
 
-- ## BotometerAnalyser
+## BotometerAnalyser
 
-Assesses the distribution of robots' like accounts sharing specific content on Twitter. It uses [Botometer](https://botometer.iuni.iu.edu) but instead of analysing one account, it analyses a bunch of accounts related to a subject.
+Assesses the distribution of robots-like accounts sharing specific content on Twitter. It uses [Botometer](https://botometer.iuni.iu.edu) but instead of analysing one account, it analyses all accounts that have shared specific content.
 
-This integration is called, through Mattermost as a Slash command, with a search term and returns a distribution about the probability that Twitter's accounts who have tweet the search term are robots.
-As we only use the Twitter Standard search API, the search is made against a sampling of recent Tweets published in the past 7 days with a mix between recent and popular content.
+This integration is called through Mattermost as a _Slash command_ with a search term and returns a distribution of the “botscores”, i.e. the how robot-like the Twitter accounts that have tweeted the search term behave.
+As we only use the Twitter [Standard search API](https://developer.twitter.com/en/docs/tweets/search/api-reference/get-search-tweets.html), the search is made against a sampling of recent Tweets published in the past 7 days with a mix between recent and popular content.
 
-An exemple of result in Mattermost where a slash command is configured to be used like this `/botometer [search term]`:
-![An exemple of result in Mattermost](Result%20example.png?raw=true)
+Example result in Mattermost where a slash command is set up to be used as `/botometer [search term]`:
+
+![Results for #GiletsJaunes](Result%20example.png?raw=true)
 
 # Installation
 
@@ -23,7 +23,7 @@ After cloning the repository, install dependencies:
 
 # Configuration
 
-Configure each hooks in the proper environment file, for example in `production.json`:
+Configure each hook in the proper environment file, for example in `production.json`:
 
 ```json
 {
@@ -47,10 +47,17 @@ Configure each hooks in the proper environment file, for example in `production.
     }
 }
 ```
+
+`hooks.domain`: Base URL used to make distribution graphs available.
+
 # Usage
 
-As it is designed to receive webhooks or slash commands, a server is needed to accepts incoming request from a Mattermost server and respond to it, so run it like this :
+In order to start a server that responds to incoming requests from a Mattermost instance:
 
 ```
     npm start
 ```
+
+# License
+
+EUPL v1.2: akin to an AGPL, but more readable and translated and legally binding into all languages of the EU. [Recap](https://choosealicense.com/licenses/eupl-1.2/).
