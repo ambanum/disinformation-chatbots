@@ -3,7 +3,7 @@ set -e
 
 ### Configuration ###
 
-SERVER=cloud@desinfo.quaidorsay.fr
+SERVER=cloud@disinfo.quaidorsay.fr
 APP_DIR=/home/cloud/desinfo-mattermost-integrations
 REMOTE_SCRIPT_PATH=/tmp/deploy-desinfo-mattermost-integrations.sh
 
