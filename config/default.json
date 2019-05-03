@@ -20,6 +20,9 @@
 					"SEARCH_TWEETS": 450
 				}
 			}
-        }
-    }
+		},
+		"mediaScale": {
+			"baseUrl": "http://disinfo.quaidorsay.fr/api"
+		}
+	}
 }

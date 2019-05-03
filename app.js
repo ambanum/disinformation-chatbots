@@ -5,6 +5,7 @@ const logger = require('morgan');
 
 const botometerAnalyserRouter = require('./botometerAnalyser/routes');
 const sendToAnalysisRouter = require('./sendToAnalysis/routes');
+const mediaScaleRouter = require('./mediaScale/routes');
 
 const app = express();
 
@@ -16,5 +17,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/botometer/', botometerAnalyserRouter);
 app.use('/sendToAnalysis/', sendToAnalysisRouter);
+app.use('/media-scale/', mediaScaleRouter);
 
 module.exports = app;
