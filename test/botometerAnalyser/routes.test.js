@@ -120,7 +120,7 @@ describe('BotometerAnalyser routes', () => {
 				});
 
 				it('should respond with the max number of account in the text', () => {
-					expect(response.body.text).to.contain('100 max');
+					expect(response.body.text).to.contain('100 accounts max');
 				});
 
 				it('should add jobs to the queue', () => {
@@ -162,12 +162,8 @@ describe('BotometerAnalyser routes', () => {
 					expect(response.body.text).to.contain(searchTerm);
 				});
 
-				it('should respond with the max number of account in the text', () => {
-					expect(response.body.text).to.contain('100 max');
-				});
-
 				it('should respond with the information that an analysis is already running in the text', () => {
-					expect(response.body.text).to.contain('already an analysis running');
+					expect(response.body.text).to.contain('already running an analysis');
 				});
 
 				it('should add schedule a second users analysis', () => {
