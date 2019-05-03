@@ -1,0 +1,20 @@
+{
+    "hooks": {
+        "domain": "http://localhost:3000",
+        "botometerAnalyser": {
+            "mattermost": {
+                "token": "zywgpfknhpg7dm4gf9tpf75rsh",
+                "icon": "https://botometer.iuni.iu.edu/assets/img/twitter-robot-bird.png"
+            },
+            "minScoreBot": 4,
+            "maxScoreHuman": 1,
+            "maxScore": 5,
+            "minScore": 0,
+            "range": 0.5,
+            "nbDay": 7,
+            "maxAccountToAnalyse": 2,
+            "dbFileName": "botometerAnalyser_cache_test.json",
+            "redisDB": 1
+        }
+    }
+}

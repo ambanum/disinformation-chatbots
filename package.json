@@ -5,7 +5,8 @@
   "scripts": {
     "test": "ALLOW_CONFIG_MUTATIONS=true NODE_ENV=test mocha --file './test/helper.js' --recursive --exit",
     "test:debug": "ALLOW_CONFIG_MUTATIONS=true NODE_ENV=test mocha --file './test/helper.js' --recursive --inspect-brk --exit",
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "deploy": "./deploy/initiate.sh"
   },
   "dependencies": {
     "bull": "^3.7.0",
@@ -15,6 +16,7 @@
     "config": "^3.0.1",
     "cookie-parser": "~1.4.3",
     "debug": "^2.6.9",
+    "dotenv": "^8.0.0",
     "express": "~4.16.0",
     "lowdb": "^1.0.0",
     "moment": "^2.24.0",
