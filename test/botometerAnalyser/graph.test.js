@@ -7,7 +7,7 @@ const app = require('../../app');
 
 const expectedGeneratedGraphPath = './test/botometerAnalyser/fixtures/graph/expectedGraph.png';
 
-describe('BotometerAnalyser utils', () => {
+describe('BotometerAnalyser graph', () => {
 	describe('#generateFromScores', () => {
 		let fileName;
 		let response;

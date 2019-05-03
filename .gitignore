@@ -1,6 +1,5 @@
 node_modules
 .vscode
-public/images/botometerAnalyser
 botometerAnalyser_cache.json
 config/development.json
 .env

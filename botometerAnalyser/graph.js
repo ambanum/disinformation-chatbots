@@ -1,3 +1,4 @@
+const fs = require('fs');
 const ChartjsNode = require('chartjs-node');
 const uuidv1 = require('uuid/v1');
 
@@ -74,7 +75,9 @@ async function generateFromScores(usersScores, sharesScores) {
 	const chartNode = new ChartjsNode(1000, 1000);
 	await chartNode.drawChart(options);
 	const fileName = uuidv1();
-	const filePath = `./public/images/botometerAnalyser/${fileName}.png`;
+	const directory = './public/images/botometerAnalyser';
+	const filePath = `${directory}/${fileName}.png`;
+
 	console.log();
 	console.log(`Writing distribution graph to ${filePath}`);
 	chartNode.writeImageToFile('image/png', filePath);
