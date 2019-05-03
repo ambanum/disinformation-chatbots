@@ -84,4 +84,36 @@ router.get('/', async (req, res) => {
 	}
 });
 
+router.post('/', async (req) => {
+	const { context } = req.body;
+
+	const { region, shares, url } = context;
+
+	try {
+		const result = JSON.parse(await request({
+			url: `${config.get('hooks.mediaScale.baseUrl')}/media-scale/1.0/around?region=${region}&shares=${shares}`,
+			method: 'GET'
+		}));
+		const fields = Object.keys(result).map(key => ({
+			title: result[key].title,
+			value: `_${key}_, [article](${result[key].url}) published on ${moment(result[key].date).format('LL')}`,
+		}));
+
+		await request({
+			url,
+			method: 'POST',
+			json: {
+				attachments: [
+					{
+						text: `_**${shares}** shares for a French article, it is comparable to:_`,
+						fields
+					}
+				]
+			}
+		});
+	} catch (error) {
+		console.log(error);
+	}
+});
+
 module.exports = router;
