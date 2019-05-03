@@ -1,15 +1,12 @@
 {
-    "hooks": {
-        "botometerAnalyser": {
-            "mattermost": {
-                "token": "zywgpfknhpg7dm4gf9tpf75rsh"
-            },
-            "minScoreBot": 3.8,
-            "maxScoreHuman": 1,
-            "maxScore": 5,
-            "minScore": 0,
-            "range": 0.5,
-            "nbDay": 7,
+	"hooks": {
+		"botometerAnalyser": {
+			"minScoreBot": 3.8,
+			"maxScoreHuman": 1,
+			"maxScore": 5,
+			"minScore": 0,
+			"range": 0.5,
+			"nbDay": 7,
 			"dbFileName": "botometerAnalyser_cache.json",
 			"timeout": 1500000,
 			"twitter": {
@@ -20,6 +17,9 @@
 					"SEARCH_TWEETS": 450
 				}
 			}
-        }
-    }
+		},
+		"mediaScale": {
+			"baseUrl": "http://disinfo.quaidorsay.fr/api"
+		}
+	}
 }

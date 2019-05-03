@@ -119,7 +119,7 @@ describe('BotometerAnalyser index', () => {
 
 		after(() => {
 			stubs.scheduleUsersAnalysis.restore();
-		})
+		});
 		it('should schedule a job with proper params', () => {
 			expect(stubs.scheduleUsersAnalysis.getCall(0).args[0]).to.deep.equal({
 				search: 'test',

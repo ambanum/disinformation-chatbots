@@ -38,10 +38,6 @@ describe('BotometerAnalyser routes', () => {
 			it('should respond an error', () => {
 				expect(response.body).to.deep.equal({ Error: 'Missing or invalid token' });
 			});
-
-			it('should not add a job to the queue', () => {
-				expect(stubs.add.calledOnce).to.be.false;
-			});
 		});
 
 		context('with invalid token', () => {
@@ -63,10 +59,6 @@ describe('BotometerAnalyser routes', () => {
 
 			it('should respond an error', () => {
 				expect(response.body).to.deep.equal({ Error: 'Missing or invalid token' });
-			});
-
-			it('should not add a job to the queue', () => {
-				expect(stubs.add.calledOnce).to.be.false;
 			});
 		});
 
@@ -120,11 +112,7 @@ describe('BotometerAnalyser routes', () => {
 				});
 
 				it('should respond with the max number of account in the text', () => {
-					expect(response.body.text).to.contain('100 max');
-				});
-
-				it('should add jobs to the queue', () => {
-					expect(stubs.scheduleUsersAnalysis.calledOnce).to.be.true;
+					expect(response.body.text).to.contain('100 accounts max');
 				});
 			});
 
@@ -162,16 +150,8 @@ describe('BotometerAnalyser routes', () => {
 					expect(response.body.text).to.contain(searchTerm);
 				});
 
-				it('should respond with the max number of account in the text', () => {
-					expect(response.body.text).to.contain('100 max');
-				});
-
 				it('should respond with the information that an analysis is already running in the text', () => {
-					expect(response.body.text).to.contain('already an analysis running');
-				});
-
-				it('should add schedule a second users analysis', () => {
-					expect(stubs.scheduleUsersAnalysis.callCount).to.equal(2);
+					expect(response.body.text).to.contain('already running an analysis');
 				});
 			});
 		});
