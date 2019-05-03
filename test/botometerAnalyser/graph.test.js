@@ -5,7 +5,8 @@ const looksSame = require('looks-same');
 const graph = require('../../botometerAnalyser/graph');
 const app = require('../../app');
 
-const expectedGeneratedGraphPath = './test/botometerAnalyser/fixtures/graph/expectedGraph.png';
+// As resulting generated image depends of the OS it will be ran, there is a specific image generated on the OS of the CI
+const expectedGeneratedGraphPath = `./test/botometerAnalyser/fixtures/graph/expectedGraph${process.env.CI ? '-CI' : ''}.png`;
 
 describe('BotometerAnalyser graph', () => {
 	describe('#generateFromScores', () => {
