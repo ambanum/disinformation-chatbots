@@ -67,6 +67,7 @@ router.get('/', async (req, res) => {
 			response_type: 'in_channel',
 			attachments: [
 				{
+					color: '#7C233C',
 					text: `_**${shares}** shares for a French article, it is comparable to:_`,
 					fields
 				}
@@ -105,6 +106,7 @@ router.post('/', async (req) => {
 			json: {
 				attachments: [
 					{
+						color: '#7C233C',
 						text: `_**${shares}** shares for a French article, it is comparable to:_`,
 						fields
 					}
