@@ -2,51 +2,52 @@ const config = require('config');
 const request = require('request-promise');
 const d = require('debug');
 
-const debug = d('BotometerAnalyser:index:debug');
-const logError = d('BotometerAnalyser:index:error');
+const debug = d('BotometerAnalyser:queryText:debug');
+const logError = d('BotometerAnalyser:queryText:error');
 const graph = require('./graph');
-const botometer = require('./botometer');
+const botometer = require('./queues/botometer');
 const utils = require('./utils');
 const twitter = require('./twitter');
 const cache = require('./cache');
 
-async function onTwitterSearchCompleted(job, result) {
-	try {
-		const { search, responseUrl, requesterUsername } = job.data;
-		const tweets = result.data.statuses;
-		debug(`Twitter search "${search}" job completed, found ${tweets.length} results`);
 
-		// If there is no search results, nothing to do
-		if (!tweets.length) {
-			debug(`No results found on Twitter for the search ${search}`);
-			return request({
-				url: responseUrl,
-				method: 'POST',
-				json: {
-					text: `@${requesterUsername} Nobody shared "${search}" on Twitter in the last 7 days`,
-					response_type: 'in_channel'
-				},
-			});
+async function scheduleUsersAnalysis({
+	search, responseUrl, requesterUsername, users, unscoredUsers
+}) {
+	const promises = [];
+	const startTimestamp = new Date().getTime();
+	unscoredUsers.forEach((user) => {
+		// When there are multiple tweets from the same user, it's possible that its score have already been got.
+		if (cache.getUserById(user.id)) {
+			return;
 		}
 
-		const users = tweets.map(tweet => ({ screenName: tweet.user.screen_name, id: tweet.user.id_str }));
-		const unscoredUsers = users.filter(user => !cache.getUserById(user.id));
-
-		debug(`Found ${users.length} users with ${unscoredUsers.length} not already in the cache`);
-
-		await botometer.scheduleUsersAnalysis({
+		promises.push(queue.add({
 			search,
 			responseUrl,
 			requesterUsername,
 			users,
-			unscoredUsers
-		});
-	} catch (e) {
-		console.error(e);
-	}
-}
+			unscoredUsers,
+			user,
+			startTimestamp
+		}, {
+			// Make theses Botometer jobs prioritary
+			priority: 1
+		}));
+	});
 
-twitter.searchQueue.on('completed', onTwitterSearchCompleted);
+	const jobs = await Promise.all(promises);
+	// We consider the timeout started since the startTimestamp date
+	// so remove the elapsed time between startTimestamp and now from the timeout
+	const durationTimeout = config.get('hooks.botometerAnalyser.timeout') - (new Date() - startTimestamp);
+	setTimeout(() => {
+		// Remove all jobs after timeout expired
+		jobs.forEach((job) => {
+			debug('Remove job', job.id, job.data.user.screenName, job.timestamp);
+			job.remove().catch(logError);
+		});
+	}, durationTimeout);
+}
 
 async function analyseUsersScores(users = []) {
 	// Get all users relate to the requester's search from cache
@@ -162,5 +163,5 @@ async function analyse({ search, responseUrl, requesterUsername }) {
 module.exports = {
 	analyse,
 	analyseUsersScores,
-	onTwitterSearchCompleted
+	scheduleUsersAnalysis,
 };

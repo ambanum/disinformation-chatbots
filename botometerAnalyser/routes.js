@@ -3,10 +3,11 @@ const express = require('express');
 const Arena = require('bull-arena');
 
 const router = express.Router();
-const { queue } = require('./botometer');
-const index = require('./index');
+const { queue } = require('./queues/botometer');
+const queryText = require('./queryText');
 
 const mattermostToken = config.get('hooks.botometerAnalyser.mattermost.token');
+
 
 if (process.env.NODE_ENV !== 'test') {
 	Arena({
@@ -31,7 +32,7 @@ router.get('/', async (req, res, next) => {
 
 	const activeJobsCount = await queue.getActiveCount();
 
-	index.analyse({
+	queryText.analyse({
 		search,
 		responseUrl: req.query.response_url,
 		requesterUsername: req.query.user_name

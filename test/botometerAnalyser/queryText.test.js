@@ -1,8 +1,8 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
 const cache = require('../../botometerAnalyser/cache');
-const index = require('../../botometerAnalyser/index');
-const botometer = require('../../botometerAnalyser/botometer');
+const queryText = require('../../botometerAnalyser/queryText');
+const search = require('../../botometerAnalyser/queues/search');
 const searchResult = require('./fixtures/twitter/search');
 
 const usersWithoutDuplicates = [
@@ -23,14 +23,14 @@ const scores = {
 	user5: 4.5,
 };
 
-describe('BotometerAnalyser index', () => {
+describe('BotometerAnalyser queryText', () => {
 	before(() => {
 		usersWithoutDuplicates.forEach(user => cache.addUser(user.screenName, user.id, scores[user.screenName]));
 	});
 
 	describe('#analyseUsersScores', () => {
 		context('without arguments', () => {
-			it('should return a proper empty result object', () => index.analyseUsersScores().then((result) => {
+			it('should return a proper empty result object', () => queryText.analyseUsersScores().then((result) => {
 				expect(result).to.deep.equal({
 					shares: {
 						total: 0,
@@ -53,7 +53,7 @@ describe('BotometerAnalyser index', () => {
 			context('when each users tweets only one time', () => {
 				let result;
 				before(async () => {
-					result = await index.analyseUsersScores(usersWithoutDuplicates);
+					result = await queryText.analyseUsersScores(usersWithoutDuplicates);
 				});
 				it('should return a proper shares analysis', () => {
 					expect(result.shares).to.deep.equal({
@@ -79,7 +79,7 @@ describe('BotometerAnalyser index', () => {
 			context('when at least a user tweets multiple times', () => {
 				let result;
 				before(async () => {
-					result = await index.analyseUsersScores(usersWithDuplicates);
+					result = await queryText.analyseUsersScores(usersWithDuplicates);
 				});
 				it('should return a proper shares analysis', () => {
 					expect(result.shares).to.deep.equal({
@@ -107,8 +107,8 @@ describe('BotometerAnalyser index', () => {
 	describe('#onTwitterSearchCompleted', () => {
 		const stubs = {};
 		before(async () => {
-			stubs.scheduleUsersAnalysis = sinon.stub(botometer, 'scheduleUsersAnalysis');
-			await index.onTwitterSearchCompleted({
+			stubs.scheduleUsersAnalysis = sinon.stub(queryText, 'scheduleUsersAnalysis');
+			await search.onTwitterSearchCompleted({
 				data: {
 					search: 'test',
 					responseUrl: 'http://mattermost-server.com',

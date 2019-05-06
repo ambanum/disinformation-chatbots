@@ -5,7 +5,8 @@ const sinon = require('sinon');
 const nock = require('nock');
 
 const app = require('../../app');
-const botometer = require('../../botometerAnalyser/botometer');
+const queryText = require('../../botometerAnalyser/queryText');
+const botometer = require('../../botometerAnalyser/queues/botometer');
 
 const searchResult = require('./fixtures/twitter/search');
 
@@ -88,7 +89,7 @@ describe('BotometerAnalyser routes', () => {
 				let response;
 				const searchTerm = 'test';
 				before(async () => {
-					stubs.scheduleUsersAnalysis = sinon.stub(botometer, 'scheduleUsersAnalysis');
+					stubs.scheduleUsersAnalysis = sinon.stub(queryText, 'scheduleUsersAnalysis');
 					response = await request(app)
 						.get('/botometer/')
 						.query({
@@ -121,7 +122,7 @@ describe('BotometerAnalyser routes', () => {
 				const searchTerm = 'test';
 
 				before(async () => {
-					stubs.scheduleUsersAnalysis = sinon.stub(botometer, 'scheduleUsersAnalysis');
+					stubs.scheduleUsersAnalysis = sinon.stub(queryText, 'scheduleUsersAnalysis');
 					stubs.getActiveCount = sinon.stub(botometer.queue, 'getActiveCount').returns('1');
 					await request(app)
 						.get('/botometer/')
