@@ -15,8 +15,15 @@ Example result in Mattermost where a slash command is set up to be used as `/bot
 
 # Installation
 
-After cloning the repository, install dependencies:
+After cloning the repository, install `cairo`:
 
+On ubuntu:
+```
+    sudo apt update
+    sudo apt install libcairo2-dev libjpeg-dev libgif-dev redis
+```
+
+Then:
 ```
     npm install
 ```
@@ -56,6 +63,16 @@ In order to start a server that responds to incoming requests from a Mattermost 
 
 ```
     npm start
+```
+
+# Dev
+
+Install `docker`. Run a mattermost image.
+
+To run the tests:
+```
+redis-server
+npm test
 ```
 
 # License
