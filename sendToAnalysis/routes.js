@@ -7,19 +7,24 @@ const router = express.Router();
 router.post('/', async (req, res) => {
 	const { context } = req.body;
 
-	context.attachments[0].actions = [
-		{
+	const {
+		region,
+		shares
+	} = context;
+
+	if (region && shares) {
+		context.attachments[0].actions = [{
 			name: 'Scale',
 			integration: {
 				url: config.get('hooks.sendToAnalysis.actionUrl'),
 				context: {
-					region: context.region, // we assume that for only french media-scale is available
-					shares: context.shares,
+					region,
+					shares,
 					url: config.get('hooks.sendToAnalysis.actionResponseUrl')
 				}
 			}
-		}
-	];
+		}];
+	}
 
 	await request({
 		url: config.get('hooks.sendToAnalysis.incomingWebHookUrl'),
