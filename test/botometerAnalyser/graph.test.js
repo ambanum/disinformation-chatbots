@@ -6,11 +6,11 @@ const graph = require('../../botometerAnalyser/graph');
 const app = require('../../app');
 
 // As resulting generated image depends of the OS it will be ran, there is a specific image generated on the OS of the CI
-suffix='';
+let suffix = '';
 if (process.env.UBUNTU) {
-	suffix='-ubuntu';
+	suffix = '-ubuntu';
 } else if (process.env.CI) {
-	suffix='-CI';
+	suffix = '-CI';
 }
 const expectedGeneratedGraphPath = `./test/botometerAnalyser/fixtures/graph/expectedGraph${suffix}.png`;
 
