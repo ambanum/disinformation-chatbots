@@ -16,6 +16,12 @@ async function scheduleUsersAnalysis({
 }) {
 	const promises = [];
 	const startTimestamp = new Date().getTime();
+
+	if (!unscoredUsers.length) {
+		await answer({ users, search, requesterUsername, responseUrl });
+		return;
+	}
+
 	unscoredUsers.forEach((user) => {
 		// When there are multiple tweets from the same user, it's possible that its score have already been got.
 		if (cache.getUserById(user.id)) {
@@ -83,43 +89,47 @@ async function botometerOnCompleted(job, botometerScore) {
 		if (!stillUnscoredUsers.length || isTimeoutExpired) {
 			debug(`Users remaining to score: ${stillUnscoredUsers.length}, is timeout expired? ${isTimeoutExpired}`);
 			debug(`Botometer analyser: Job (${job.timestamp}, ${job.id}) completed for search "${search}" requested by "${requesterUsername}"`);
-
-			const result = await analyseUsersScores(users);
-
-			request({
-				url: responseUrl,
-				method: 'POST',
-				json: {
-					text: `@${requesterUsername} Done!`,
-					response_type: 'in_channel',
-					attachments: [
-						{
-							title: 'During the last 7 days',
-							fields: [
-								{
-									short: false,
-									title: `On the latest ${result.shares.total} shares of "${search}":`,
-									value: `**${result.shares.percentageBot}%** have a high probability to be made by bots\n**${result.shares.percentageHuman}%** have a high probability to be made by humans\nFor the remaining **${result.shares.percentageUnknown}%** it's difficult to say`
-								},
-								{
-									short: false,
-									title: `On the ${result.users.total} users who have written content that contains "${search}":`,
-									value: `**${result.users.percentageBot}%** have a high probability to be bots\n**${result.users.percentageHuman}%** have a high probability to be humans\nFor the remaining **${result.users.percentageUnknown}%** it's difficult to say`
-								},
-							],
-						},
-						{
-							title: 'Here is the distribution',
-							title_link: `${config.get('hooks.domain')}/images/botometerAnalyser/${result.imageUrl}.png`,
-							image_url: `${config.get('hooks.domain')}/images/botometerAnalyser/${result.imageUrl}.png`
-						}
-					]
-				},
-			});
+			await answer({ users, search, requesterUsername, responseUrl });
 		}
 	} catch (error) {
 		logError(error);
 	}
+}
+
+
+async function answer({ users, search, requesterUsername, responseUrl }) {
+	const result = await analyseUsersScores(users);
+
+	request({
+		url: responseUrl,
+		method: 'POST',
+		json: {
+			text: `@${requesterUsername} Done!`,
+			response_type: 'in_channel',
+			attachments: [
+				{
+					title: 'During the last 7 days',
+					fields: [
+						{
+							short: false,
+							title: `On the latest ${result.shares.total} shares of "${search}":`,
+							value: `**${result.shares.percentageBot}%** have a high probability to be made by bots\n**${result.shares.percentageHuman}%** have a high probability to be made by humans\nFor the remaining **${result.shares.percentageUnknown}%** it's difficult to say`
+						},
+						{
+							short: false,
+							title: `On the ${result.users.total} users who have written content that contains "${search}":`,
+							value: `**${result.users.percentageBot}%** have a high probability to be bots\n**${result.users.percentageHuman}%** have a high probability to be humans\nFor the remaining **${result.users.percentageUnknown}%** it's difficult to say`
+						},
+					],
+				},
+				{
+					title: 'Here is the distribution',
+					title_link: `${config.get('hooks.domain')}/images/botometerAnalyser/${result.imageUrl}.png`,
+					image_url: `${config.get('hooks.domain')}/images/botometerAnalyser/${result.imageUrl}.png`
+				}
+			]
+		},
+	});
 }
 
 
