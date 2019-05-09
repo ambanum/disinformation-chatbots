@@ -1,6 +1,5 @@
 const request = require('request-promise');
 
-const cache = require('../cache');
 const usersAnalysis = require('../usersAnalysis');
 const { retweeterIdsQueue } = require('../queues/retweeters');
 
@@ -20,7 +19,7 @@ retweeterIdsQueue.on('completed', onRetweetersCompleted);
 async function onRetweetersCompleted(job, result) {
 	try {
 		const { screenName, tweetId, responseUrl, requesterUsername } = job.data;
-		const retweeterIds = result.ids;
+		const retweeterIds = result.data.ids;
 
 		// If there is no search results, nothing to do
 		if (!retweeterIds.length) {
@@ -34,15 +33,13 @@ async function onRetweetersCompleted(job, result) {
 			});
 		}
 
-		const users = retweeterIds.map(tweet => ({ screenName: tweet.user.screen_name, id: tweet.user.id_str }));
-		const unscoredUsers = users.filter(user => !cache.getUserById(user.id));
+		const users = retweeterIds.map(userId => ({ userId }));
 
 		await usersAnalysis.scheduleUsersAnalysis({
 			search: tweetId,
 			responseUrl,
 			requesterUsername,
-			users,
-			unscoredUsers
+			users
 		});
 	} catch (e) {
 		console.error(e);

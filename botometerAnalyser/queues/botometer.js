@@ -37,9 +37,9 @@ function getBotScore(userScreenName) {
 
 botometerQueue.process(async (job) => {
 	try {
-		const { screenName } = job.data.user;
+		const { screenName, userId } = job.data.user;
 		debug('Start job', screenName);
-		return getBotScore(screenName);
+		return getBotScore({ screenName, userId });
 	} catch (error) {
 		logError(error);
 		return null;

@@ -28,14 +28,25 @@ function getUserByName(screenName) {
 		.value();
 }
 
-function getUserById(id) {
+function getUserById(userId) {
 	return db.get('users')
-		.find({ id })
+		.find({ id: userId })
 		.value();
+}
+
+function getUser({ screenName, userId }) {
+	if (userId) {
+		return getUserById(userId);
+	}
+	if (screenName) {
+		return getUserByName(screenName);
+	}
+	throw new Error('Incorrect parameters');
 }
 
 module.exports = {
 	addUser,
 	getUserByName,
-	getUserById
+	getUserById,
+	getUser,
 };

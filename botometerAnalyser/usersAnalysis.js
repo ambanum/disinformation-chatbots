@@ -12,8 +12,12 @@ const debug = d('BotometerAnalyser:queryText:debug');
 
 
 async function scheduleUsersAnalysis({
-	search, responseUrl, requesterUsername, users, unscoredUsers
+	search, responseUrl, requesterUsername, users
 }) {
+	const unscoredUsers = users.filter(user => !cache.getUser(user));
+
+	debug(`Found ${users.length} users with ${unscoredUsers.length} not already in the cache`);
+
 	const promises = [];
 	const startTimestamp = new Date().getTime();
 
@@ -24,7 +28,7 @@ async function scheduleUsersAnalysis({
 
 	unscoredUsers.forEach((user) => {
 		// When there are multiple tweets from the same user, it's possible that its score have already been got.
-		if (cache.getUserById(user.id)) {
+		if (cache.getUser(user)) {
 			return;
 		}
 
@@ -75,13 +79,13 @@ async function botometerOnCompleted(job, botometerScore) {
 
 		if (!botometerScore) {
 			debug(`Add in the cache user without score: ${user}`);
-			cache.addUser(user.screenName, user.id, 'NA');
+			cache.addUser(user.screenName, user.userId, 'NA');
 		} else {
 			debug(`Add in the cache user with score: ${botometerScore.user.screen_name}, ${botometerScore.user.id_str}, ${botometerScore.botometer.display_scores.universal}`);
 			cache.addUser(botometerScore.user.screen_name, botometerScore.user.id_str, botometerScore.botometer.display_scores.universal);
 		}
 
-		const stillUnscoredUsers = unscoredUsers.filter(user => !cache.getUserById(user.id));
+		const stillUnscoredUsers = unscoredUsers.filter(user => !cache.getUser(user));
 		debug('Remaining users to be scored for this search', stillUnscoredUsers.length);
 
 		const isTimeoutExpired = new Date() >= new Date(startTimestamp + config.get('hooks.botometerAnalyser.timeout'));
@@ -135,7 +139,7 @@ async function answer({ users, search, requesterUsername, responseUrl }) {
 
 async function analyseUsersScores(users = []) {
 	// Get all users relate to the requester's search from cache
-	const cachedUsers = users.map(user => cache.getUserById(user.id)).filter(user => !!user);
+	const cachedUsers = users.map(user => cache.getUser(user)).filter(user => !!user);
 	// Uniquify this array
 	const uniquedCachedUsers = cachedUsers.filter((user, position, array) => array.map(user => user.screenName).indexOf(user.screenName) === position);
 

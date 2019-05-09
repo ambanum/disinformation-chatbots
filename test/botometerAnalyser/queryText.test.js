@@ -6,11 +6,11 @@ const usersAnalysis = require('../../botometerAnalyser/usersAnalysis');
 const searchResult = require('./fixtures/twitter/search');
 
 const usersWithoutDuplicates = [
-	{ screenName: 'user1', id: '1' },
-	{ screenName: 'user2', id: '2' },
-	{ screenName: 'user3', id: '3' },
-	{ screenName: 'user4', id: '4' },
-	{ screenName: 'user5', id: '5' }
+	{ screenName: 'user1', userId: '1' },
+	{ screenName: 'user2', userId: '2' },
+	{ screenName: 'user3', userId: '3' },
+	{ screenName: 'user4', userId: '4' },
+	{ screenName: 'user5', userId: '5' }
 ];
 
 const usersWithDuplicates = [...usersWithoutDuplicates, usersWithoutDuplicates[2]];
@@ -25,7 +25,7 @@ const scores = {
 
 describe('BotometerAnalyser queryText', () => {
 	before(() => {
-		usersWithoutDuplicates.forEach(user => cache.addUser(user.screenName, user.id, scores[user.screenName]));
+		usersWithoutDuplicates.forEach(user => cache.addUser(user.screenName, user.userId, scores[user.screenName]));
 	});
 
 	describe('#analyseUsersScores', () => {
@@ -128,47 +128,25 @@ describe('BotometerAnalyser queryText', () => {
 				users: [
 					{
 						screenName: 'NASA',
-						id: '11348282',
+						userId: '11348282',
 					},
 					{
 						screenName: 'NASA',
-						id: '11348282',
+						userId: '11348282',
 					},
 					{
 						screenName: 'NASA',
-						id: '11348282',
+						userId: '11348282',
 					},
 					{
 						screenName: 'Astro_Kanai',
-						id: '842625693733203968',
+						userId: '842625693733203968',
 					},
 					{
 						screenName: 'NASAJPL',
-						id: '19802879',
+						userId: '19802879',
 					}
 				],
-				unscoredUsers: [
-					{
-						screenName: 'NASA',
-						id: '11348282',
-					},
-					{
-						screenName: 'NASA',
-						id: '11348282',
-					},
-					{
-						screenName: 'NASA',
-						id: '11348282',
-					},
-					{
-						screenName: 'Astro_Kanai',
-						id: '842625693733203968',
-					},
-					{
-						screenName: 'NASAJPL',
-						id: '19802879',
-					}
-				]
 			});
 		});
 	});
