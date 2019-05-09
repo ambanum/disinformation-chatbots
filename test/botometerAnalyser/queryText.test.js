@@ -2,6 +2,7 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const cache = require('../../botometerAnalyser/cache');
 const queryText = require('../../botometerAnalyser/pipelines/queryText');
+const usersAnalysis = require('../../botometerAnalyser/usersAnalysis');
 const searchResult = require('./fixtures/twitter/search');
 
 const usersWithoutDuplicates = [
@@ -29,7 +30,7 @@ describe('BotometerAnalyser queryText', () => {
 
 	describe('#analyseUsersScores', () => {
 		context('without arguments', () => {
-			it('should return a proper empty result object', () => queryText.analyseUsersScores().then((result) => {
+			it('should return a proper empty result object', () => usersAnalysis.analyseUsersScores().then((result) => {
 				expect(result).to.deep.equal({
 					shares: {
 						total: 0,
@@ -52,7 +53,7 @@ describe('BotometerAnalyser queryText', () => {
 			context('when each users tweets only one time', () => {
 				let result;
 				before(async () => {
-					result = await queryText.analyseUsersScores(usersWithoutDuplicates);
+					result = await usersAnalysis.analyseUsersScores(usersWithoutDuplicates);
 				});
 				it('should return a proper shares analysis', () => {
 					expect(result.shares).to.deep.equal({
@@ -78,7 +79,7 @@ describe('BotometerAnalyser queryText', () => {
 			context('when at least a user tweets multiple times', () => {
 				let result;
 				before(async () => {
-					result = await queryText.analyseUsersScores(usersWithDuplicates);
+					result = await usersAnalysis.analyseUsersScores(usersWithDuplicates);
 				});
 				it('should return a proper shares analysis', () => {
 					expect(result.shares).to.deep.equal({
@@ -106,7 +107,7 @@ describe('BotometerAnalyser queryText', () => {
 	describe('#onTwitterSearchCompleted', () => {
 		const stubs = {};
 		before(async () => {
-			stubs.scheduleUsersAnalysis = sinon.stub(queryText, 'scheduleUsersAnalysis');
+			stubs.scheduleUsersAnalysis = sinon.stub(usersAnalysis, 'scheduleUsersAnalysis');
 			await queryText.onTwitterSearchCompleted({
 				data: {
 					search: 'test',

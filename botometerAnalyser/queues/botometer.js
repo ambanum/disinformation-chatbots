@@ -24,7 +24,7 @@ if (process.env.NODE_ENV === 'test') {
 	queueOptions.redis = { db: config.get('hooks.botometerAnalyser.redisDB') };
 }
 
-const queue = new Bull('Botometer: getScore', queueOptions);
+const botometerQueue = new Bull('Botometer: getScore', queueOptions);
 
 function getBotScore(userScreenName) {
 	try {
@@ -35,7 +35,7 @@ function getBotScore(userScreenName) {
 	}
 }
 
-queue.process(async (job) => {
+botometerQueue.process(async (job) => {
 	try {
 		const { screenName } = job.data.user;
 		debug('Start job', screenName);
@@ -48,5 +48,5 @@ queue.process(async (job) => {
 
 
 module.exports = {
-	queue,
+	botometerQueue,
 };

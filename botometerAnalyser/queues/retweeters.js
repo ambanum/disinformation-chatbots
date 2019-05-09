@@ -4,7 +4,7 @@ const config = require('config');
 const { T } = require('../apis/twitter');
 
 
-const retweetersIdsQueueOptions = {
+const retweeterIdsQueueOptions = {
 	limiter: {
 		max: config.get('hooks.botometerAnalyser.twitter.rateLimits.STATUSES_RETWEETERS_IDS'),
 		duration: config.get('hooks.botometerAnalyser.twitter.rateLimits.TIME_WINDOW')
@@ -14,9 +14,9 @@ const retweetersIdsQueueOptions = {
 	}
 };
 if (process.env.NODE_ENV === 'test') {
-	retweetersIdsQueueOptions.redis = { db: 1 };
+	retweeterIdsQueueOptions.redis = { db: 1 };
 }
-const retweetersIdsQueue = new Bull('Twitter: GET statuses/retweeters/ids', retweetersIdsQueueOptions);
+const retweeterIdsQueue = new Bull('Twitter: GET statuses/retweeters/ids', retweeterIdsQueueOptions);
 
 function getRetweetersIds(tweetId) {
 	const twitterParams = {
@@ -27,9 +27,9 @@ function getRetweetersIds(tweetId) {
 	return T.get('statuses/retweeters/ids', twitterParams);
 }
 
-retweetersIdsQueue.process(async (job) => {
+retweeterIdsQueue.process(async (job) => {
 	try {
-		return getRetweetersIds(job.data.id);
+		return getRetweetersIds(job.data.tweetId);
 	} catch (e) {
 		console.error(e);
 	}
@@ -37,5 +37,5 @@ retweetersIdsQueue.process(async (job) => {
 
 
 module.exports = {
-	retweetersIdsQueue,
+	retweeterIdsQueue,
 };

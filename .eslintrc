@@ -26,6 +26,7 @@
         "implicit-arrow-linebreak": [
             "off"
         ],
+        "object-curly-newline": 0,
         "no-param-reassign": 0,
         "no-underscore-dangle": 0,
         "no-tabs": 0,

@@ -6,7 +6,8 @@ const nock = require('nock');
 
 const app = require('../../app');
 const queryText = require('../../botometerAnalyser/pipelines/queryText');
-const botometer = require('../../botometerAnalyser/queues/botometer');
+const usersAnalysis = require('../../botometerAnalyser/usersAnalysis');
+const { botometerQueue } = require('../../botometerAnalyser/queues/botometer');
 
 const searchResult = require('./fixtures/twitter/search');
 
@@ -23,7 +24,7 @@ describe('BotometerAnalyser routes', () => {
 		context('with no token provided', () => {
 			let response;
 			before(async () => {
-				stubs.add = sinon.stub(botometer.queue, 'add');
+				stubs.add = sinon.stub(botometerQueue, 'add');
 				response = await request(app)
 					.get('/botometer/');
 			});
@@ -44,7 +45,7 @@ describe('BotometerAnalyser routes', () => {
 		context('with invalid token', () => {
 			let response;
 			before(async () => {
-				stubs.add = sinon.stub(botometer.queue, 'add');
+				stubs.add = sinon.stub(botometerQueue, 'add');
 				response = await request(app)
 					.get('/botometer/')
 					.query({ token: 'value' });
@@ -89,7 +90,7 @@ describe('BotometerAnalyser routes', () => {
 				let response;
 				const searchTerm = 'test';
 				before(async () => {
-					stubs.scheduleUsersAnalysis = sinon.stub(queryText, 'scheduleUsersAnalysis');
+					stubs.scheduleUsersAnalysis = sinon.stub(usersAnalysis, 'scheduleUsersAnalysis');
 					response = await request(app)
 						.get('/botometer/')
 						.query({
@@ -122,8 +123,8 @@ describe('BotometerAnalyser routes', () => {
 				const searchTerm = 'test';
 
 				before(async () => {
-					stubs.scheduleUsersAnalysis = sinon.stub(queryText, 'scheduleUsersAnalysis');
-					stubs.getActiveCount = sinon.stub(botometer.queue, 'getActiveCount').returns('1');
+					stubs.scheduleUsersAnalysis = sinon.stub(usersAnalysis, 'scheduleUsersAnalysis');
+					stubs.getActiveCount = sinon.stub(botometerQueue, 'getActiveCount').returns('1');
 					await request(app)
 						.get('/botometer/')
 						.query({
