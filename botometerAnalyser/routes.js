@@ -4,7 +4,7 @@ const Arena = require('bull-arena');
 
 const router = express.Router();
 const { queue } = require('./queues/botometer');
-const queryText = require('./queryText');
+const queryText = require('./pipelines/queryText');
 
 const mattermostToken = config.get('hooks.botometerAnalyser.mattermost.token');
 

@@ -1,8 +1,7 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
 const cache = require('../../botometerAnalyser/cache');
-const queryText = require('../../botometerAnalyser/queryText');
-const search = require('../../botometerAnalyser/queues/search');
+const queryText = require('../../botometerAnalyser/pipelines/queryText');
 const searchResult = require('./fixtures/twitter/search');
 
 const usersWithoutDuplicates = [
@@ -108,7 +107,7 @@ describe('BotometerAnalyser queryText', () => {
 		const stubs = {};
 		before(async () => {
 			stubs.scheduleUsersAnalysis = sinon.stub(queryText, 'scheduleUsersAnalysis');
-			await search.onTwitterSearchCompleted({
+			await queryText.onTwitterSearchCompleted({
 				data: {
 					search: 'test',
 					responseUrl: 'http://mattermost-server.com',

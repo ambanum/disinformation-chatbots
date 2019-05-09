@@ -39,6 +39,7 @@
                 "argsIgnorePattern": "next"
             }
         ],
+        "no-use-before-define": 0,
         "chai-friendly/no-unused-expressions": 2
     }
 }

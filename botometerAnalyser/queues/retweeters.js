@@ -1,6 +1,7 @@
 const Bull = require('bull');
+const config = require('config');
 
-const twitter = require('../twitter');
+const { T } = require('../apis/twitter');
 
 
 const retweetersIdsQueueOptions = {
@@ -23,7 +24,7 @@ function getRetweetersIds(tweetId) {
 		count: 100,
 		stringify_ids: true,
 	};
-	return twitter.T.get('statuses/retweeters/ids', twitterParams);
+	return T.get('statuses/retweeters/ids', twitterParams);
 }
 
 retweetersIdsQueue.process(async (job) => {
@@ -33,6 +34,7 @@ retweetersIdsQueue.process(async (job) => {
 		console.error(e);
 	}
 });
+
 
 module.exports = {
 	retweetersIdsQueue,

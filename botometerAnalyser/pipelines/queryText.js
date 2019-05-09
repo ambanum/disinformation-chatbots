@@ -4,11 +4,60 @@ const d = require('debug');
 
 const debug = d('BotometerAnalyser:queryText:debug');
 const logError = d('BotometerAnalyser:queryText:error');
-const graph = require('./graph');
-const botometer = require('./queues/botometer');
-const utils = require('./utils');
-const twitter = require('./twitter');
-const cache = require('./cache');
+const graph = require('../graph');
+const botometer = require('../queues/botometer');
+const utils = require('../utils');
+const cache = require('../cache');
+const { searchQueue } = require('../queues/search');
+
+
+async function analyse({ search, responseUrl, requesterUsername }) {
+	searchQueue.add({
+		search,
+		responseUrl,
+		requesterUsername
+	});
+}
+
+
+searchQueue.on('completed', onTwitterSearchCompleted);
+
+
+async function onTwitterSearchCompleted(job, result) {
+	try {
+		const { search, responseUrl, requesterUsername } = job.data;
+		const tweets = result.data.statuses;
+		debug(`Twitter search "${search}" job completed, found ${tweets.length} results`);
+
+		// If there is no search results, nothing to do
+		if (!tweets.length) {
+			debug(`No results found on Twitter for the search ${search}`);
+			return request({
+				url: responseUrl,
+				method: 'POST',
+				json: {
+					text: `@${requesterUsername} Nobody shared "${search}" on Twitter in the last 7 days`,
+					response_type: 'in_channel'
+				},
+			});
+		}
+
+		const users = tweets.map(tweet => ({ screenName: tweet.user.screen_name, id: tweet.user.id_str }));
+		const unscoredUsers = users.filter(user => !cache.getUserById(user.id));
+
+		debug(`Found ${users.length} users with ${unscoredUsers.length} not already in the cache`);
+
+		await module.exports.scheduleUsersAnalysis({
+			search,
+			responseUrl,
+			requesterUsername,
+			users,
+			unscoredUsers
+		});
+	} catch (e) {
+		console.error(e);
+	}
+}
 
 
 async function scheduleUsersAnalysis({
@@ -22,7 +71,7 @@ async function scheduleUsersAnalysis({
 			return;
 		}
 
-		promises.push(queue.add({
+		promises.push(botometer.queue.add({
 			search,
 			responseUrl,
 			requesterUsername,
@@ -49,41 +98,11 @@ async function scheduleUsersAnalysis({
 	}, durationTimeout);
 }
 
-async function analyseUsersScores(users = []) {
-	// Get all users relate to the requester's search from cache
-	const cachedUsers = users.map(user => cache.getUserById(user.id)).filter(user => !!user);
-	// Uniquify this array
-	const uniquedCachedUsers = cachedUsers.filter((user, position, array) => array.map(user => user.screenName).indexOf(user.screenName) === position);
 
-	const scores = cachedUsers.map(user => user.score);
-	const uniqueUsersScores = uniquedCachedUsers.map(user => user.score);
+botometer.queue.on('completed', botometerOnCompleted);
 
-	const sharesPercentage = utils.percentagesBotHuman(scores);
-	const usersPercentage = utils.percentagesBotHuman(uniqueUsersScores);
 
-	let imageFileName;
-	if (users.length) {
-		imageFileName = await graph.generateFromScores(uniqueUsersScores, scores);
-	}
-
-	return {
-		shares: {
-			total: cachedUsers.length,
-			percentageUnknown: 100 - (sharesPercentage.percentageBot + sharesPercentage.percentageHuman),
-			percentageBot: sharesPercentage.percentageBot,
-			percentageHuman: sharesPercentage.percentageHuman,
-		},
-		users: {
-			total: uniquedCachedUsers.length,
-			percentageUnknown: 100 - (usersPercentage.percentageBot + usersPercentage.percentageHuman),
-			percentageBot: usersPercentage.percentageBot,
-			percentageHuman: usersPercentage.percentageHuman,
-		},
-		imageUrl: imageFileName
-	};
-}
-
-botometer.queue.on('completed', async (job, botometerScore) => {
+async function botometerOnCompleted(job, botometerScore) {
 	try {
 		const {
 			user,
@@ -150,18 +169,47 @@ botometer.queue.on('completed', async (job, botometerScore) => {
 	} catch (error) {
 		logError(error);
 	}
-});
-
-async function analyse({ search, responseUrl, requesterUsername }) {
-	twitter.searchQueue.add({
-		search,
-		responseUrl,
-		requesterUsername
-	});
 }
+
+
+async function analyseUsersScores(users = []) {
+	// Get all users relate to the requester's search from cache
+	const cachedUsers = users.map(user => cache.getUserById(user.id)).filter(user => !!user);
+	// Uniquify this array
+	const uniquedCachedUsers = cachedUsers.filter((user, position, array) => array.map(user => user.screenName).indexOf(user.screenName) === position);
+
+	const scores = cachedUsers.map(user => user.score);
+	const uniqueUsersScores = uniquedCachedUsers.map(user => user.score);
+
+	const sharesPercentage = utils.percentagesBotHuman(scores);
+	const usersPercentage = utils.percentagesBotHuman(uniqueUsersScores);
+
+	let imageFileName;
+	if (users.length) {
+		imageFileName = await graph.generateFromScores(uniqueUsersScores, scores);
+	}
+
+	return {
+		shares: {
+			total: cachedUsers.length,
+			percentageUnknown: 100 - (sharesPercentage.percentageBot + sharesPercentage.percentageHuman),
+			percentageBot: sharesPercentage.percentageBot,
+			percentageHuman: sharesPercentage.percentageHuman,
+		},
+		users: {
+			total: uniquedCachedUsers.length,
+			percentageUnknown: 100 - (usersPercentage.percentageBot + usersPercentage.percentageHuman),
+			percentageBot: usersPercentage.percentageBot,
+			percentageHuman: usersPercentage.percentageHuman,
+		},
+		imageUrl: imageFileName
+	};
+}
+
 
 module.exports = {
 	analyse,
 	analyseUsersScores,
 	scheduleUsersAnalysis,
+	onTwitterSearchCompleted,
 };

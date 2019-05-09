@@ -9,4 +9,5 @@ const T = new Twitter({
 });
 
 module.exports = {
+	T,
 };

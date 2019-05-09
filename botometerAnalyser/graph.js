@@ -1,4 +1,3 @@
-const fs = require('fs');
 const ChartjsNode = require('chartjs-node');
 const uuidv1 = require('uuid/v1');
 

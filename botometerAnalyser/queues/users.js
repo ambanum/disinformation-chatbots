@@ -1,6 +1,7 @@
 const Bull = require('bull');
+const config = require('config');
 
-const twitter = require('../twitter');
+const { T } = require('../apis/twitter');
 
 
 const getUserQueueOptions = {
@@ -22,7 +23,7 @@ function getUser(userId) {
 		user_id: userId,
 		include_entities: false
 	};
-	return twitter.T.get('users/show', twitterParams);
+	return T.get('users/show', twitterParams);
 }
 
 getUserQueue.process(async (job) => {

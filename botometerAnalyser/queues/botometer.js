@@ -1,7 +1,8 @@
 const Bull = require('bull');
 const d = require('debug');
-
 const config = require('config');
+
+const { B } = require('../apis/botometer');
 
 const debug = d('BotometerAnalyser:botometer:debug');
 const logError = d('BotometerAnalyser:botometer:error');
@@ -44,6 +45,7 @@ queue.process(async (job) => {
 		return null;
 	}
 });
+
 
 module.exports = {
 	queue,

@@ -5,7 +5,7 @@ const sinon = require('sinon');
 const nock = require('nock');
 
 const app = require('../../app');
-const queryText = require('../../botometerAnalyser/queryText');
+const queryText = require('../../botometerAnalyser/pipelines/queryText');
 const botometer = require('../../botometerAnalyser/queues/botometer');
 
 const searchResult = require('./fixtures/twitter/search');
