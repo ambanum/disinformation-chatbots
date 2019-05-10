@@ -15,6 +15,20 @@ async function analyse({ screenName, tweetId, responseUrl, requesterUsername }) 
 }
 
 getTweetQueue.on('completed', onGetTweetCompleted);
+getTweetQueue.on('failed', failed);
+
+async function failed(job) {
+	const { screenName, tweetId, responseUrl, requesterUsername } = job.data;
+
+	return request({
+		url: responseUrl,
+		method: 'POST',
+		json: {
+			text: `@${requesterUsername} I did not found the tweet ${tweetId} by @${screenName}`,
+			response_type: 'in_channel'
+		},
+	});
+}
 
 
 async function onGetTweetCompleted(job, result) {

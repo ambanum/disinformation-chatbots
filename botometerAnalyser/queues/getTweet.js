@@ -20,7 +20,7 @@ const getTweetQueue = new Bull('Twitter: GET statuses/show', getTweetQueueOption
 
 getTweetQueue.process(async (job) => {
 	try {
-		return T.get('statuses/show', { id: job.data.tweetId	});
+		return T.get('statuses/show', { id: job.data.tweetId });
 	} catch (e) {
 		console.error(e);
 	}
