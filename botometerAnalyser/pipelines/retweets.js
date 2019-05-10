@@ -1,6 +1,6 @@
 const request = require('request-promise');
 
-const usersAnalysis = require('../usersAnalysis');
+const usersAnalysis = require('./usersAnalysis');
 const { retweeterIdsQueue } = require('../queues/retweeters');
 
 

@@ -2,10 +2,10 @@ const config = require('config');
 const d = require('debug');
 const request = require('request-promise');
 
-const utils = require('./utils');
-const cache = require('./cache');
-const graph = require('./graph');
-const { botometerQueue } = require('./queues/botometer');
+const utils = require('../utils');
+const cache = require('../cache');
+const graph = require('../graph');
+const { botometerQueue } = require('../queues/botometer');
 
 const logError = d('BotometerAnalyser:queryText:error');
 const debug = d('BotometerAnalyser:queryText:debug');

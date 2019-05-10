@@ -2,7 +2,7 @@ const request = require('request-promise');
 const d = require('debug');
 
 const debug = d('BotometerAnalyser:queryText:debug');
-const usersAnalysis = require('../usersAnalysis');
+const usersAnalysis = require('./usersAnalysis');
 const { searchQueue } = require('../queues/search');
 
 

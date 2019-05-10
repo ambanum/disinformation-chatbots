@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const cache = require('../../botometerAnalyser/cache');
 const queryText = require('../../botometerAnalyser/pipelines/queryText');
-const usersAnalysis = require('../../botometerAnalyser/usersAnalysis');
+const usersAnalysis = require('../../botometerAnalyser/pipelines/usersAnalysis');
 const searchResult = require('./fixtures/twitter/search');
 
 const usersWithoutDuplicates = [

@@ -6,7 +6,7 @@ const nock = require('nock');
 
 const app = require('../../app');
 const queryText = require('../../botometerAnalyser/pipelines/queryText');
-const usersAnalysis = require('../../botometerAnalyser/usersAnalysis');
+const usersAnalysis = require('../../botometerAnalyser/pipelines/usersAnalysis');
 const { botometerQueue } = require('../../botometerAnalyser/queues/botometer');
 
 const searchResult = require('./fixtures/twitter/search');
