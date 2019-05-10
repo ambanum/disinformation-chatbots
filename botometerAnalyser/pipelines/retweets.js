@@ -5,10 +5,11 @@ const { retweeterIdsQueue } = require('../queues/retweeters');
 const { getTweetQueue } = require('../queues/getTweet');
 
 
-async function analyse({ screenName, tweetId, responseUrl, requesterUsername }) {
+async function analyse({ screenName, tweetId, tweetUrl, responseUrl, requesterUsername }) {
 	getTweetQueue.add({
 		screenName,
 		tweetId,
+		tweetUrl,
 		responseUrl,
 		requesterUsername
 	});
@@ -18,13 +19,13 @@ getTweetQueue.on('completed', onGetTweetCompleted);
 getTweetQueue.on('failed', failed);
 
 async function failed(job) {
-	const { screenName, tweetId, responseUrl, requesterUsername } = job.data;
+	const { tweetUrl, responseUrl, requesterUsername } = job.data;
 
 	return request({
 		url: responseUrl,
 		method: 'POST',
 		json: {
-			text: `@${requesterUsername} I did not found the tweet ${tweetId} by @${screenName}`,
+			text: `@${requesterUsername} I could not found the tweet ${tweetUrl}. Are you sure you spelled it correctly?`,
 			response_type: 'in_channel'
 		},
 	});

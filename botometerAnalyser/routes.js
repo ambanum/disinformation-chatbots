@@ -38,12 +38,13 @@ ${activeJobsCount ? '\n:mantelpiece_clock: _I’m already running an analysis, I
 	});
 }
 
-async function startRetweetPipeline({ req, res, screenName, tweetId }) {
+async function startRetweetPipeline({ req, res, screenName, tweetId, tweetUrl }) {
 	const activeJobsCount = await botometerQueue.getActiveCount();
 
 	retweets.analyse({
 		screenName,
 		tweetId,
+		tweetUrl,
 		responseUrl: req.query.response_url,
 		requesterUsername: req.query.user_name
 	});
@@ -59,30 +60,30 @@ ${activeJobsCount ? '\n:mantelpiece_clock: _I’m already running an analysis, I
 
 
 router.get('/', async (req, res, next) => {
-	const { token: givenToken, text: search } = req.query;
+	const { token: givenToken, text } = req.query;
 
 	if (givenToken !== mattermostToken) {
 		return res.status(401).json({ Error: 'Missing or invalid token' });
 	}
 
-	if (!search) {
+	if (!text) {
 		return res.json({
 			text: 'Hey! I can help you by analyzing the latest shares on a specific topic but I need a query.\nSo, give me a keyword, an URL or some text. For example: \n`/botometer disinformation`'
 		});
 	}
 
 	const retweetRegexp = /^https:\/\/twitter\.com\/([^\/]*)\/status\/(\d+)$/;
-	const retweetRegexpResult = search.match(retweetRegexp);
+	const retweetRegexpResult = text.match(retweetRegexp);
 	if (retweetRegexpResult) {
 		const screenName = retweetRegexpResult[1];
 		const tweetId = retweetRegexpResult[2];
 
-		await startRetweetPipeline({ req, res, screenName, tweetId });
+		await startRetweetPipeline({ req, res, screenName, tweetId, tweetUrl: text });
 		return;
 	}
 
 
-	await startQueryTextPipeline({ req, res, search });
+	await startQueryTextPipeline({ req, res, search: text });
 });
 
 module.exports = router;
