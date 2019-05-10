@@ -188,7 +188,7 @@ async function answerTextSearchAnalysis({ context, analysis }) {
 
 
 async function answerRetweetAnalysis({ context, analysis }) {
-	const { screenName, tweetId, responseUrl, requesterUsername } = context;
+	const { screenName, tweet, responseUrl, requesterUsername } = context;
 
 	request({
 		url: responseUrl,
@@ -201,7 +201,7 @@ async function answerRetweetAnalysis({ context, analysis }) {
 					fields: [
 						{
 							short: false,
-							title: `On the latest ${analysis.users.total} retweets of "${tweetId}" by @${screenName}:`, //TODO
+							title: `On the latest ${analysis.users.total} retweets of "${tweet.text}" by @${screenName}:`,
 							value: `**${analysis.users.percentageBot}%** have a high probability to be made by bots\n**${analysis.users.percentageHuman}%** have a high probability to be made by humans\nFor the remaining **${analysis.users.percentageUnknown}%** it's difficult to say`
 						},
 					],

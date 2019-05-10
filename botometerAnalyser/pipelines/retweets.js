@@ -2,11 +2,28 @@ const request = require('request-promise');
 
 const usersAnalysis = require('./usersAnalysis');
 const { retweeterIdsQueue } = require('../queues/retweeters');
+const { getTweetQueue } = require('../queues/getTweet');
 
 
 async function analyse({ screenName, tweetId, responseUrl, requesterUsername }) {
+	getTweetQueue.add({
+		screenName,
+		tweetId,
+		responseUrl,
+		requesterUsername
+	});
+}
+
+getTweetQueue.on('completed', onGetTweetCompleted);
+
+
+async function onGetTweetCompleted(job, result) {
+	const {	screenName, responseUrl, tweetId, requesterUsername } = job.data;
+	const tweet = result.data;
+
 	retweeterIdsQueue.add({
 		screenName,
+		tweet,
 		tweetId,
 		responseUrl,
 		requesterUsername
@@ -18,7 +35,7 @@ retweeterIdsQueue.on('completed', onRetweetersCompleted);
 
 async function onRetweetersCompleted(job, result) {
 	try {
-		const { screenName, tweetId, responseUrl, requesterUsername } = job.data;
+		const { screenName, tweet, responseUrl, requesterUsername } = job.data;
 		const retweeterIds = result.data.ids;
 
 		// If there is no search results, nothing to do
@@ -27,7 +44,7 @@ async function onRetweetersCompleted(job, result) {
 				url: responseUrl,
 				method: 'POST',
 				json: {
-					text: `@${requesterUsername} Nobody retweeted the tweet "${tweetId}"`,
+					text: `@${requesterUsername} Nobody retweeted the tweet "${tweet.id_str}"`,
 					response_type: 'in_channel'
 				},
 			});
@@ -40,7 +57,7 @@ async function onRetweetersCompleted(job, result) {
 			analysisType: usersAnalysis.RETWEET_ANALYSIS,
 			context: {
 				screenName,
-				tweetId,
+				tweet,
 				responseUrl,
 				requesterUsername,
 			}
