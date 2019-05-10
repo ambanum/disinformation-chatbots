@@ -1,5 +1,6 @@
 const request = require('request-promise');
 const d = require('debug');
+const config = require('config');
 
 const debug = d('BotometerAnalyser:queryText:debug');
 const usersAnalysis = require('./usersAnalysis');
@@ -44,14 +45,49 @@ async function onTwitterSearchCompleted(job, result) {
 			responseUrl,
 			requesterUsername,
 			users,
+			callerCallback: sendAnswer,
 		});
 	} catch (e) {
 		console.error(e);
 	}
 }
 
+async function sendAnswer({ search, requesterUsername, responseUrl, analysis }) {
+	request({
+		url: responseUrl,
+		method: 'POST',
+		json: {
+			text: `@${requesterUsername} Done!`,
+			response_type: 'in_channel',
+			attachments: [
+				{
+					title: 'During the last 7 days',
+					fields: [
+						{
+							short: false,
+							title: `On the latest ${analysis.shares.total} shares of "${search}":`,
+							value: `**${analysis.shares.percentageBot}%** have a high probability to be made by bots\n**${analysis.shares.percentageHuman}%** have a high probability to be made by humans\nFor the remaining **${analysis.shares.percentageUnknown}%** it's difficult to say`
+						},
+						{
+							short: false,
+							title: `On the ${analysis.users.total} users who have written content that contains "${search}":`,
+							value: `**${analysis.users.percentageBot}%** have a high probability to be bots\n**${analysis.users.percentageHuman}%** have a high probability to be humans\nFor the remaining **${analysis.users.percentageUnknown}%** it's difficult to say`
+						},
+					],
+				},
+				{
+					title: 'Here is the distribution',
+					title_link: `${config.get('hooks.domain')}/images/botometerAnalyser/${analysis.imageUrl}.png`,
+					image_url: `${config.get('hooks.domain')}/images/botometerAnalyser/${analysis.imageUrl}.png`
+				}
+			]
+		},
+	});
+}
+
 
 module.exports = {
 	analyse,
 	onTwitterSearchCompleted,
+	sendAnswer,
 };

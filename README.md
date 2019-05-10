@@ -78,7 +78,7 @@ MASHAPE_KEY=xxx
 
 Install `docker`. Run a mattermost image: `docker run --name mattermost-preview -d --publish 8065:8065 --add-host dockerhost:127.0.0.1 mattermost/mattermost-preview`
 
-Access the local mattermost instance at `localhost:8065`. Create a new team, a new channel, an integration (slask command) to `http://host.docker.internal:3000/botometer` (GET). In "system console"/"advanced"/"developer", add the trusted hosts `127.0.0.1 localhost host.docker.internal`.
+Access the local mattermost instance at `localhost:8065`. Create a new team, a new channel, an integration (slash command) to `http://host.docker.internal:3000/botometer` (GET). In "system console"/"advanced"/"developer", add the trusted hosts `127.0.0.1 localhost host.docker.internal`.
 
 Install redis and run a server: `redis-server`.
 

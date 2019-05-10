@@ -147,6 +147,7 @@ describe('BotometerAnalyser queryText', () => {
 						userId: '19802879',
 					}
 				],
+				callerCallback: queryText.sendAnswer,
 			});
 		});
 	});

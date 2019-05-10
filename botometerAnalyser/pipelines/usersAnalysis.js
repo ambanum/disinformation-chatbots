@@ -1,6 +1,5 @@
 const config = require('config');
 const d = require('debug');
-const request = require('request-promise');
 
 const utils = require('../utils');
 const cache = require('../cache');
@@ -12,7 +11,7 @@ const debug = d('BotometerAnalyser:queryText:debug');
 
 
 async function scheduleUsersAnalysis({
-	search, responseUrl, requesterUsername, users
+	search, responseUrl, requesterUsername, users, callerCallback,
 }) {
 	const unscoredUsers = users.filter(user => !cache.getUser(user));
 
@@ -39,7 +38,8 @@ async function scheduleUsersAnalysis({
 			users,
 			unscoredUsers,
 			user,
-			startTimestamp
+			startTimestamp,
+			callerCallback,
 		}, {
 			// Make theses Botometer jobs prioritary
 			priority: 1
@@ -72,7 +72,8 @@ async function botometerOnCompleted(job, botometerScore) {
 			search,
 			requesterUsername,
 			responseUrl,
-			startTimestamp
+			startTimestamp,
+			callerCallback,
 		} = job.data;
 
 		debug(`Botometer job for user ${user.screenName} completed`);
@@ -93,7 +94,7 @@ async function botometerOnCompleted(job, botometerScore) {
 		if (!stillUnscoredUsers.length || isTimeoutExpired) {
 			debug(`Users remaining to score: ${stillUnscoredUsers.length}, is timeout expired? ${isTimeoutExpired}`);
 			debug(`Botometer analyser: Job (${job.timestamp}, ${job.id}) completed for search "${search}" requested by "${requesterUsername}"`);
-			await answer({ users, search, requesterUsername, responseUrl });
+			await answer({ users, search, requesterUsername, responseUrl, callerCallback });
 		}
 	} catch (error) {
 		logError(error);
@@ -101,39 +102,10 @@ async function botometerOnCompleted(job, botometerScore) {
 }
 
 
-async function answer({ users, search, requesterUsername, responseUrl }) {
-	const result = await analyseUsersScores(users);
+async function answer({ users, search, requesterUsername, responseUrl, callerCallback }) {
+	const analysis = await analyseUsersScores(users);
 
-	request({
-		url: responseUrl,
-		method: 'POST',
-		json: {
-			text: `@${requesterUsername} Done!`,
-			response_type: 'in_channel',
-			attachments: [
-				{
-					title: 'During the last 7 days',
-					fields: [
-						{
-							short: false,
-							title: `On the latest ${result.shares.total} shares of "${search}":`,
-							value: `**${result.shares.percentageBot}%** have a high probability to be made by bots\n**${result.shares.percentageHuman}%** have a high probability to be made by humans\nFor the remaining **${result.shares.percentageUnknown}%** it's difficult to say`
-						},
-						{
-							short: false,
-							title: `On the ${result.users.total} users who have written content that contains "${search}":`,
-							value: `**${result.users.percentageBot}%** have a high probability to be bots\n**${result.users.percentageHuman}%** have a high probability to be humans\nFor the remaining **${result.users.percentageUnknown}%** it's difficult to say`
-						},
-					],
-				},
-				{
-					title: 'Here is the distribution',
-					title_link: `${config.get('hooks.domain')}/images/botometerAnalyser/${result.imageUrl}.png`,
-					image_url: `${config.get('hooks.domain')}/images/botometerAnalyser/${result.imageUrl}.png`
-				}
-			]
-		},
-	});
+	callerCallback({ users, search, requesterUsername, responseUrl, analysis });
 }
 
 
