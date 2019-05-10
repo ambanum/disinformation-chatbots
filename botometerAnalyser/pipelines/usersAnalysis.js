@@ -11,7 +11,7 @@ const debug = d('BotometerAnalyser:queryText:debug');
 
 
 async function scheduleUsersAnalysis({
-	search, responseUrl, requesterUsername, users, callerCallback,
+	users, callerCallback, callerData
 }) {
 	const unscoredUsers = users.filter(user => !cache.getUser(user));
 
@@ -21,7 +21,7 @@ async function scheduleUsersAnalysis({
 	const startTimestamp = new Date().getTime();
 
 	if (!unscoredUsers.length) {
-		await answer({ users, search, requesterUsername, responseUrl });
+		await answer({ callerData,	callerCallback,	users });
 		return;
 	}
 
@@ -32,14 +32,12 @@ async function scheduleUsersAnalysis({
 		}
 
 		promises.push(botometerQueue.add({
-			search,
-			responseUrl,
-			requesterUsername,
-			users,
-			unscoredUsers,
 			user,
 			startTimestamp,
+			users,
+			unscoredUsers,
 			callerCallback,
+			callerData,
 		}, {
 			// Make theses Botometer jobs prioritary
 			priority: 1
@@ -67,13 +65,11 @@ async function botometerOnCompleted(job, botometerScore) {
 	try {
 		const {
 			user,
-			unscoredUsers,
-			users,
-			search,
-			requesterUsername,
-			responseUrl,
 			startTimestamp,
+			users,
+			unscoredUsers,
 			callerCallback,
+			callerData,
 		} = job.data;
 
 		debug(`Botometer job for user ${user.screenName} completed`);
@@ -93,8 +89,9 @@ async function botometerOnCompleted(job, botometerScore) {
 
 		if (!stillUnscoredUsers.length || isTimeoutExpired) {
 			debug(`Users remaining to score: ${stillUnscoredUsers.length}, is timeout expired? ${isTimeoutExpired}`);
-			debug(`Botometer analyser: Job (${job.timestamp}, ${job.id}) completed for search "${search}" requested by "${requesterUsername}"`);
-			await answer({ users, search, requesterUsername, responseUrl, callerCallback });
+			debug(`Botometer analyser: Job (${job.timestamp}, ${job.id}) completed for analysis "${callerData}"`);
+
+			await answer({ users, callerCallback, callerData });
 		}
 	} catch (error) {
 		logError(error);
@@ -102,10 +99,10 @@ async function botometerOnCompleted(job, botometerScore) {
 }
 
 
-async function answer({ users, search, requesterUsername, responseUrl, callerCallback }) {
+async function answer({ users, callerCallback, callerData }) {
 	const analysis = await analyseUsersScores(users);
 
-	callerCallback({ users, search, requesterUsername, responseUrl, analysis });
+	await callerCallback({ callerData, analysis });
 }
 
 

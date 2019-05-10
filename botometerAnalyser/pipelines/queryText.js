@@ -41,18 +41,22 @@ async function onTwitterSearchCompleted(job, result) {
 		const users = tweets.map(tweet => ({ screenName: tweet.user.screen_name, userId: tweet.user.id_str }));
 
 		await usersAnalysis.scheduleUsersAnalysis({
-			search,
-			responseUrl,
-			requesterUsername,
 			users,
 			callerCallback: sendAnswer,
+			callerData: {
+				search,
+				responseUrl,
+				requesterUsername,
+			},
 		});
 	} catch (e) {
 		console.error(e);
 	}
 }
 
-async function sendAnswer({ search, requesterUsername, responseUrl, analysis }) {
+async function sendAnswer({ callerData, analysis }) {
+	const { search, requesterUsername, responseUrl } = callerData;
+
 	request({
 		url: responseUrl,
 		method: 'POST',
