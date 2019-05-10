@@ -84,4 +84,5 @@ async function onRetweetersCompleted(job, result) {
 
 module.exports = {
 	analyse,
+	onRetweetersCompleted,
 };
