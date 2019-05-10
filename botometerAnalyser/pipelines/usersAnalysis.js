@@ -1,3 +1,4 @@
+const request = require('request-promise');
 const config = require('config');
 const d = require('debug');
 
@@ -10,8 +11,12 @@ const logError = d('BotometerAnalyser:queryText:error');
 const debug = d('BotometerAnalyser:queryText:debug');
 
 
+const RETWEET_ANALYSIS = 0;
+const TEXT_SEARCH_ANALYSIS = 1;
+
+
 async function scheduleUsersAnalysis({
-	users, callerCallback, callerData
+	users, analysisType, context
 }) {
 	const unscoredUsers = users.filter(user => !cache.getUser(user));
 
@@ -21,7 +26,7 @@ async function scheduleUsersAnalysis({
 	const startTimestamp = new Date().getTime();
 
 	if (!unscoredUsers.length) {
-		await answer({ callerData,	callerCallback,	users });
+		await answer({ users,	analysisType, context });
 		return;
 	}
 
@@ -36,8 +41,8 @@ async function scheduleUsersAnalysis({
 			startTimestamp,
 			users,
 			unscoredUsers,
-			callerCallback,
-			callerData,
+			analysisType,
+			context,
 		}, {
 			// Make theses Botometer jobs prioritary
 			priority: 1
@@ -68,8 +73,8 @@ async function botometerOnCompleted(job, botometerScore) {
 			startTimestamp,
 			users,
 			unscoredUsers,
-			callerCallback,
-			callerData,
+			analysisType,
+			context,
 		} = job.data;
 
 		debug(`Botometer job for user ${user.screenName} completed`);
@@ -89,9 +94,9 @@ async function botometerOnCompleted(job, botometerScore) {
 
 		if (!stillUnscoredUsers.length || isTimeoutExpired) {
 			debug(`Users remaining to score: ${stillUnscoredUsers.length}, is timeout expired? ${isTimeoutExpired}`);
-			debug(`Botometer analyser: Job (${job.timestamp}, ${job.id}) completed for analysis "${callerData}"`);
+			debug(`Botometer analyser: Job (${job.timestamp}, ${job.id}) completed for analysis "${context}"`);
 
-			await answer({ users, callerCallback, callerData });
+			await answer({ users, analysisType, context });
 		}
 	} catch (error) {
 		logError(error);
@@ -99,10 +104,15 @@ async function botometerOnCompleted(job, botometerScore) {
 }
 
 
-async function answer({ users, callerCallback, callerData }) {
+async function answer({ users, analysisType, context }) {
 	const analysis = await analyseUsersScores(users);
 
-	await callerCallback({ callerData, analysis });
+	if (analysisType === TEXT_SEARCH_ANALYSIS) {
+		await answerTextSearchAnalysis({ context, analysis });
+	}
+	if (analysisType === RETWEET_ANALYSIS) {
+		await answerRetweetAnalysis({ context, analysis });
+	}
 }
 
 
@@ -141,7 +151,75 @@ async function analyseUsersScores(users = []) {
 }
 
 
+async function answerTextSearchAnalysis({ context, analysis }) {
+	const { search, requesterUsername, responseUrl } = context;
+
+	request({
+		url: responseUrl,
+		method: 'POST',
+		json: {
+			text: `@${requesterUsername} Done!`,
+			response_type: 'in_channel',
+			attachments: [
+				{
+					title: 'During the last 7 days',
+					fields: [
+						{
+							short: false,
+							title: `On the latest ${analysis.shares.total} shares of "${search}":`,
+							value: `**${analysis.shares.percentageBot}%** have a high probability to be made by bots\n**${analysis.shares.percentageHuman}%** have a high probability to be made by humans\nFor the remaining **${analysis.shares.percentageUnknown}%** it's difficult to say`
+						},
+						{
+							short: false,
+							title: `On the ${analysis.users.total} users who have written content that contains "${search}":`,
+							value: `**${analysis.users.percentageBot}%** have a high probability to be bots\n**${analysis.users.percentageHuman}%** have a high probability to be humans\nFor the remaining **${analysis.users.percentageUnknown}%** it's difficult to say`
+						},
+					],
+				},
+				{
+					title: 'Here is the distribution',
+					title_link: `${config.get('hooks.domain')}/images/botometerAnalyser/${analysis.imageUrl}.png`,
+					image_url: `${config.get('hooks.domain')}/images/botometerAnalyser/${analysis.imageUrl}.png`
+				}
+			]
+		},
+	});
+}
+
+
+async function answerRetweetAnalysis({ context, analysis }) {
+	const { screenName, tweetId, responseUrl, requesterUsername } = context;
+
+	request({
+		url: responseUrl,
+		method: 'POST',
+		json: {
+			text: `@${requesterUsername} Done!`,
+			response_type: 'in_channel',
+			attachments: [
+				{
+					fields: [
+						{
+							short: false,
+							title: `On the latest ${analysis.users.total} retweets of "${tweetId}" by @${screenName}:`, //TODO
+							value: `**${analysis.users.percentageBot}%** have a high probability to be made by bots\n**${analysis.users.percentageHuman}%** have a high probability to be made by humans\nFor the remaining **${analysis.users.percentageUnknown}%** it's difficult to say`
+						},
+					],
+				},
+				{
+					title: 'Here is the distribution',
+					title_link: `${config.get('hooks.domain')}/images/botometerAnalyser/${analysis.imageUrl}.png`,
+					image_url: `${config.get('hooks.domain')}/images/botometerAnalyser/${analysis.imageUrl}.png`
+				}
+			]
+		},
+	});
+}
+
+
 module.exports = {
+	RETWEET_ANALYSIS,
+	TEXT_SEARCH_ANALYSIS,
 	scheduleUsersAnalysis,
 	analyseUsersScores,
 };
