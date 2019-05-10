@@ -26,20 +26,12 @@ if (process.env.NODE_ENV === 'test') {
 
 const botometerQueue = new Bull('Botometer: getScore', queueOptions);
 
-function getBotScore(userScreenName) {
-	try {
-		return B.getBotScore(userScreenName);
-	} catch (error) {
-		logError(error);
-		return null;
-	}
-}
 
 botometerQueue.process(async (job) => {
 	try {
-		const { screenName, userId } = job.data.user;
-		debug('Start job', screenName);
-		return getBotScore({ screenName, userId });
+		const { user } = job.data;
+		debug('Start job', user);
+		return B.getBotScore(user);
 	} catch (error) {
 		logError(error);
 		return null;
