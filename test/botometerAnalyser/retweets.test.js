@@ -12,12 +12,14 @@ describe('BotometerAnalyser retweets', () => {
 			await retweets.onRetweetersCompleted({
 				data: {
 					screenName: 'twitterTestUser',
-					tweet: { sometweet: 42 },
+					tweet: { sometweet: 42, retweet_count: 12 },
 					tweetId: '123456',
+					retweeterIds: [],
+					cursor: '-1',
 					responseUrl: 'http://mattermost-server.com',
 					requesterUsername: 'michelbl'
 				}
-			}, { data: { ids: ['45', '62'] } });
+			}, { data: { ids: ['45', '62'], next_cursor_str: '0' } });
 		});
 
 		after(() => {
@@ -35,7 +37,7 @@ describe('BotometerAnalyser retweets', () => {
 				],
 				analysisType: 'Retweet analysis',
 				context: {
-					tweet: { sometweet: 42 },
+					tweet: { sometweet: 42, retweet_count: 12  },
 					screenName: 'twitterTestUser',
 					responseUrl: 'http://mattermost-server.com',
 					requesterUsername: 'michelbl',

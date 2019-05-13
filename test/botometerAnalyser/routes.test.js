@@ -164,7 +164,6 @@ describe('BotometerAnalyser routes', () => {
 describe('BotometerAnalyser RETWEET_REGEXP', () => {
 	it('should match', () => {
 		const text = 'https://twitter.com/PiersRobinson1/status/1122074038166278144';
-		console.log(text.match(RETWEET_REGEXP))
 		expect(text.match(RETWEET_REGEXP)).to.deep.equal([
 			text,
 			'PiersRobinson1',

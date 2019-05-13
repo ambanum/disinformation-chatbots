@@ -26,27 +26,22 @@ describe('BotometerAnalyser queryText', () => {
 			expect(stubs.scheduleUsersAnalysis.getCall(0).args[0]).to.deep.equal({
 				users: [
 					{
-						screenName: 'NASA',
 						userId: '11348282',
 					},
 					{
-						screenName: 'NASA',
 						userId: '11348282',
 					},
 					{
-						screenName: 'NASA',
 						userId: '11348282',
 					},
 					{
-						screenName: 'Astro_Kanai',
 						userId: '842625693733203968',
 					},
 					{
-						screenName: 'NASAJPL',
 						userId: '19802879',
 					}
 				],
-				analysisType: 'Query text analysis',
+				analysisType: 'Text search analysis',
 				context: {
 					search: 'test',
 					responseUrl: 'http://mattermost-server.com',
