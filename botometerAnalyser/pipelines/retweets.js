@@ -52,6 +52,8 @@ async function onGetTweetCompleted(job, result) {
 		screenName,
 		tweet,
 		tweetId,
+		retweeterIds: [],
+		cursor: '-1',
 		responseUrl,
 		requesterUsername
 	});
@@ -62,8 +64,26 @@ retweeterIdsQueue.on('completed', onRetweetersCompleted);
 
 async function onRetweetersCompleted(job, result) {
 	try {
-		const { screenName, tweet, responseUrl, requesterUsername } = job.data;
-		const retweeterIds = result.data.ids;
+		const { screenName, tweet, tweetId, responseUrl, requesterUsername } = job.data;
+		const retweeterIdsBatch = result.data.ids;
+		const nextCursor = result.data.next_cursor_str;
+		const retweeterIds = job.data.retweeterIds.concat(retweeterIdsBatch);
+
+		if (nextCursor !== '0') {
+			// NB: Currently this never happens
+			// See https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/get-statuses-retweeters-ids.html, https://github.com/sferik/twitter/issues/425
+			await retweeterIdsQueue.add({
+				screenName,
+				tweet,
+				tweetId,
+				retweeterIds,
+				cursor: nextCursor,
+				responseUrl,
+				requesterUsername
+			});
+			return;
+		}
+
 		const users = retweeterIds.map(userId => ({ userId }));
 
 		await usersAnalysis.scheduleUsersAnalysis({

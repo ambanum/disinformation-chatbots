@@ -18,18 +18,16 @@ if (process.env.NODE_ENV === 'test') {
 }
 const retweeterIdsQueue = new Bull('Twitter: GET statuses/retweeters/ids', retweeterIdsQueueOptions);
 
-function getRetweetersIds(tweetId) {
-	const twitterParams = {
-		id: tweetId,
-		count: 100,
-		stringify_ids: true,
-	};
-	return T.get('statuses/retweeters/ids', twitterParams);
-}
-
 retweeterIdsQueue.process(async (job) => {
 	try {
-		return getRetweetersIds(job.data.tweetId);
+		const { tweetId, cursor } = job.data;
+		const twitterParams = {
+			id: tweetId,
+			count: 100,
+			cursor,
+			stringify_ids: true,
+		};
+		return T.get('statuses/retweeters/ids', twitterParams);
 	} catch (e) {
 		console.error(e);
 	}

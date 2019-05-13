@@ -80,7 +80,7 @@ async function botometerOnCompleted(job, botometerScore) {
 		debug(`Botometer job for user ${user.userId} completed`);
 
 		if (!botometerScore) {
-			debug(`Add in the cache user without score: ${user}`);
+			debug(`Add in the cache user without score: ${user.userId}`);
 			cache.addUser(user.screenName, user.userId, 'NA');
 		} else {
 			debug(`Add in the cache user with score: ${botometerScore.user.screen_name}, ${botometerScore.user.id_str}, ${botometerScore.botometer.display_scores.universal}`);
