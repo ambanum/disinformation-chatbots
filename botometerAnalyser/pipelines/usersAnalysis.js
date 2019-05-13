@@ -26,7 +26,7 @@ async function scheduleUsersAnalysis({
 	const startTimestamp = new Date().getTime();
 
 	if (!unscoredUsers.length) {
-		await answer({ users,	analysisType, context });
+		await answer({ users, analysisType, context });
 		return;
 	}
 

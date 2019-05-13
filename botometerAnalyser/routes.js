@@ -73,8 +73,7 @@ router.get('/', async (req, res, next) => {
 	const retweetRegexpResult = text.match(RETWEET_REGEXP);
 	let responseText = null;
 	if (retweetRegexpResult) {
-		const screenName = retweetRegexpResult[1];
-		const tweetId = retweetRegexpResult[2];
+		const [, screenName, tweetId] = retweetRegexpResult;
 
 		responseText = await startRetweetPipeline({
 			responseUrl: req.query.response_url,
