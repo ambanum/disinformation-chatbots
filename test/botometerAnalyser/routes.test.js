@@ -5,7 +5,7 @@ const sinon = require('sinon');
 const nock = require('nock');
 
 const app = require('../../app');
-const queryText = require('../../botometerAnalyser/pipelines/queryText');
+const { RETWEET_REGEXP } = require('../../botometerAnalyser/routes');
 const usersAnalysis = require('../../botometerAnalyser/pipelines/usersAnalysis');
 const { botometerQueue } = require('../../botometerAnalyser/queues/botometer');
 
@@ -157,5 +157,23 @@ describe('BotometerAnalyser routes', () => {
 				});
 			});
 		});
+	});
+});
+
+
+describe('BotometerAnalyser RETWEET_REGEXP', () => {
+	it('should match', () => {
+		const text = 'https://twitter.com/PiersRobinson1/status/1122074038166278144';
+		console.log(text.match(RETWEET_REGEXP))
+		expect(text.match(RETWEET_REGEXP)).to.deep.equal([
+			text,
+			'PiersRobinson1',
+			'1122074038166278144',
+		]);
+	});
+
+	it('should match', () => {
+		const text = 'http://twitter.com/PiersRobinson1/status/1122074038166278144';
+		expect(text.match(RETWEET_REGEXP)).to.be.null;
 	});
 });

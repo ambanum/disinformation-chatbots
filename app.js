@@ -4,7 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
-const botometerAnalyserRouter = require('./botometerAnalyser/routes');
+const botometerAnalyserRouter = require('./botometerAnalyser/routes').router;
 const sendToAnalysisRouter = require('./sendToAnalysis/routes');
 const mediaScaleRouter = require('./mediaScale/routes');
 
