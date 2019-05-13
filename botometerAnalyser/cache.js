@@ -22,31 +22,13 @@ function addUser(screenName, id, score) {
 	}
 }
 
-function getUserByName(screenName) {
-	return db.get('users')
-		.find({ screenName })
-		.value();
-}
-
 function getUserById(userId) {
 	return db.get('users')
 		.find({ id: userId })
 		.value();
 }
 
-function getUser({ screenName, userId }) {
-	if (userId) {
-		return getUserById(userId);
-	}
-	if (screenName) {
-		return getUserByName(screenName);
-	}
-	throw new Error('Incorrect parameters');
-}
-
 module.exports = {
 	addUser,
-	getUserByName,
 	getUserById,
-	getUser,
 };

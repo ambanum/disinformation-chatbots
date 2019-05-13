@@ -18,7 +18,7 @@ const TEXT_SEARCH_ANALYSIS = 1;
 async function scheduleUsersAnalysis({
 	users, analysisType, context
 }) {
-	const unscoredUsers = users.filter(user => !cache.getUser(user));
+	const unscoredUsers = users.filter(user => !cache.getUserById(user.userId));
 
 	debug(`Found ${users.length} users with ${unscoredUsers.length} not already in the cache`);
 
@@ -32,7 +32,7 @@ async function scheduleUsersAnalysis({
 
 	unscoredUsers.forEach((user) => {
 		// When there are multiple tweets from the same user, it's possible that its score have already been got.
-		if (cache.getUser(user)) {
+		if (cache.getUserById(user.userId)) {
 			return;
 		}
 
@@ -87,7 +87,7 @@ async function botometerOnCompleted(job, botometerScore) {
 			cache.addUser(botometerScore.user.screen_name, botometerScore.user.id_str, botometerScore.botometer.display_scores.universal);
 		}
 
-		const stillUnscoredUsers = unscoredUsers.filter(user => !cache.getUser(user));
+		const stillUnscoredUsers = unscoredUsers.filter(user => !cache.getUserById(user.userId));
 		debug('Remaining users to be scored for this search', stillUnscoredUsers.length);
 
 		const isTimeoutExpired = new Date() >= new Date(startTimestamp + config.get('hooks.botometerAnalyser.timeout'));
@@ -118,7 +118,7 @@ async function answer({ users, analysisType, context }) {
 
 async function analyseUsersScores(users = []) {
 	// Get all users relate to the requester's search from cache
-	const cachedUsers = users.map(user => cache.getUser(user)).filter(user => !!user);
+	const cachedUsers = users.map(user => cache.getUserById(user.userId)).filter(user => !!user);
 	// Uniquify this array
 	const uniquedCachedUsers = cachedUsers.filter((user, position, array) => array.map(user => user.screenName).indexOf(user.screenName) === position);
 

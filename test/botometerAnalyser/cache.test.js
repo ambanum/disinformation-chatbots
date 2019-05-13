@@ -60,35 +60,6 @@ describe('BotometerAnalyser cache', () => {
 		});
 	});
 
-	context('#getUserByName', () => {
-		before(() => {
-			cache.addUser(user1.screenName, user1.id, user1.score);
-		});
-
-		context('when the user does not exist', () => {
-			it('should return nothing', () => {
-				expect(cache.getUserByName('sbrada')).to.equal(undefined);
-			});
-		});
-
-		context('when the user exists', () => {
-			it('should return the proper score', () => {
-				expect(cache.getUserByName(user1.screenName)).to.deep.equal(user1);
-			});
-		});
-
-		context('with multiple users', () => {
-			before(() => {
-				cache.addUser(user1.screenName, user1.id, user1.score);
-				cache.addUser(user2.screenName, user2.id, user2.score);
-			});
-
-			it('should return the proper score', () => {
-				expect(cache.getUserByName(user2.screenName)).to.deep.equal(user2);
-			});
-		});
-	});
-
 	context('#getUserById', () => {
 		before(() => {
 			cache.addUser(user1.screenName, user1.id, user1.score);
