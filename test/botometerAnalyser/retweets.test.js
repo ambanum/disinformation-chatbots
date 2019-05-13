@@ -33,7 +33,7 @@ describe('BotometerAnalyser retweets', () => {
 						userId: '62',
 					},
 				],
-				analysisType: 0,
+				analysisType: 'Retweet analysis',
 				context: {
 					tweet: { sometweet: 42 },
 					screenName: 'twitterTestUser',

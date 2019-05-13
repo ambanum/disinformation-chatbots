@@ -46,7 +46,7 @@ describe('BotometerAnalyser queryText', () => {
 						userId: '19802879',
 					}
 				],
-				analysisType: 1,
+				analysisType: 'Query text analysis',
 				context: {
 					search: 'test',
 					responseUrl: 'http://mattermost-server.com',

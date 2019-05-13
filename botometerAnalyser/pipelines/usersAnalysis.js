@@ -11,8 +11,8 @@ const logError = d('BotometerAnalyser:queryText:error');
 const debug = d('BotometerAnalyser:queryText:debug');
 
 
-const RETWEET_ANALYSIS = 0;
-const TEXT_SEARCH_ANALYSIS = 1;
+const RETWEET_ANALYSIS = 'Retweet analysis';
+const TEXT_SEARCH_ANALYSIS = 'Text search analysis';
 
 
 async function scheduleUsersAnalysis({
@@ -56,7 +56,7 @@ async function scheduleUsersAnalysis({
 	setTimeout(() => {
 		// Remove all jobs after timeout expired
 		jobs.forEach((job) => {
-			debug('Remove job', job.id, job.data.user.screenName, job.timestamp);
+			debug('Remove job', job.id, job.data.user.userId, job.timestamp);
 			job.remove().catch(logError);
 		});
 	}, durationTimeout);
@@ -120,7 +120,7 @@ async function analyseUsersScores(users = []) {
 	// Get all users relate to the requester's search from cache
 	const cachedUsers = users.map(user => cache.getUserById(user.userId)).filter(user => !!user);
 	// Uniquify this array
-	const uniquedCachedUsers = cachedUsers.filter((user, position, array) => array.map(user => user.screenName).indexOf(user.screenName) === position);
+	const uniquedCachedUsers = cachedUsers.filter((user, position, array) => array.map(user => user.userId).indexOf(user.userId) === position);
 
 	const scores = cachedUsers.map(user => user.score);
 	const uniqueUsersScores = uniquedCachedUsers.map(user => user.score);
