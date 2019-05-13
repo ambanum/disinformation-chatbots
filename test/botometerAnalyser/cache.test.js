@@ -7,20 +7,20 @@ describe('BotometerAnalyser cache', () => {
 	const user1 = {
 		screenName: 'testUsername',
 		score: 4,
-		id: 1
+		userId: 1
 	};
 
 	const user2 = {
 		screenName: 'testUsername2',
 		score: 2,
-		id: 2
+		userId: 2
 	};
 
 	context('#addUser', () => {
 		let json;
 		context('when the user does not exist', () => {
 			before(() => {
-				cache.addUser(user1.screenName, user1.id, user1.score);
+				cache.addUser(user1.screenName, user1.userId, user1.score);
 				const rawdata = fs.readFileSync(config.get('hooks.botometerAnalyser.dbFileName'));
 				json = JSON.parse(rawdata);
 			});
@@ -32,8 +32,8 @@ describe('BotometerAnalyser cache', () => {
 		context('when the user exists', () => {
 			const newScore = 3;
 			before(() => {
-				cache.addUser(user1.screenName, user1.id, user1.score);
-				cache.addUser(user1.screenName, user1.id, newScore);
+				cache.addUser(user1.screenName, user1.userId, user1.score);
+				cache.addUser(user1.screenName, user1.userId, newScore);
 				const rawdata = fs.readFileSync(config.get('hooks.botometerAnalyser.dbFileName'));
 				json = JSON.parse(rawdata);
 			});
@@ -44,8 +44,8 @@ describe('BotometerAnalyser cache', () => {
 
 		context('with multiple users', () => {
 			before(() => {
-				cache.addUser(user1.screenName, user1.id, user1.score);
-				cache.addUser(user2.screenName, user2.id, user2.score);
+				cache.addUser(user1.screenName, user1.userId, user1.score);
+				cache.addUser(user2.screenName, user2.userId, user2.score);
 				const rawdata = fs.readFileSync(config.get('hooks.botometerAnalyser.dbFileName'));
 				json = JSON.parse(rawdata);
 			});
@@ -62,7 +62,7 @@ describe('BotometerAnalyser cache', () => {
 
 	context('#getUserById', () => {
 		before(() => {
-			cache.addUser(user1.screenName, user1.id, user1.score);
+			cache.addUser(user1.screenName, user1.userId, user1.score);
 		});
 
 		context('when the user does not exist', () => {
@@ -73,18 +73,18 @@ describe('BotometerAnalyser cache', () => {
 
 		context('when the user exists', () => {
 			it('should return the proper score', () => {
-				expect(cache.getUserById(user1.id)).to.deep.equal(user1);
+				expect(cache.getUserById(user1.userId)).to.deep.equal(user1);
 			});
 		});
 
 		context('with multiple users', () => {
 			before(() => {
-				cache.addUser(user1.screenName, user1.id, user1.score);
-				cache.addUser(user2.screenName, user2.id, user2.score);
+				cache.addUser(user1.screenName, user1.userId, user1.score);
+				cache.addUser(user2.screenName, user2.userId, user2.score);
 			});
 
 			it('should return the proper score', () => {
-				expect(cache.getUserById(user2.id)).to.deep.equal(user2);
+				expect(cache.getUserById(user2.userId)).to.deep.equal(user2);
 			});
 		});
 	});
