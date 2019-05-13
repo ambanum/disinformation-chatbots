@@ -36,7 +36,19 @@ async function onGetTweetCompleted(job, result) {
 	const {	screenName, responseUrl, tweetId, requesterUsername } = job.data;
 	const tweet = result.data;
 
-	retweeterIdsQueue.add({
+	if (!tweet.retweet_count) {
+		request({
+			url: responseUrl,
+			method: 'POST',
+			json: {
+				text: `@${requesterUsername} Nobody retweeted the tweet "${tweet.id_str}"`,
+				response_type: 'in_channel'
+			},
+		});
+		return;
+	}
+
+	await retweeterIdsQueue.add({
 		screenName,
 		tweet,
 		tweetId,
@@ -52,19 +64,6 @@ async function onRetweetersCompleted(job, result) {
 	try {
 		const { screenName, tweet, responseUrl, requesterUsername } = job.data;
 		const retweeterIds = result.data.ids;
-
-		// If there is no search results, nothing to do
-		if (!retweeterIds.length) {
-			return request({
-				url: responseUrl,
-				method: 'POST',
-				json: {
-					text: `@${requesterUsername} Nobody retweeted the tweet "${tweet.id_str}"`,
-					response_type: 'in_channel'
-				},
-			});
-		}
-
 		const users = retweeterIds.map(userId => ({ userId }));
 
 		await usersAnalysis.scheduleUsersAnalysis({

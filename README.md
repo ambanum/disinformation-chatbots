@@ -109,7 +109,7 @@ npm test
 To run manual tests:
 
 ```
-npm start
+DEBUG=BotometerAnalyser:* npm start
 ```
 
 
