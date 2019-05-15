@@ -29,9 +29,9 @@ const botometerQueue = new Bull('Botometer: getScore', queueOptions);
 
 botometerQueue.process(async (job) => {
 	try {
-		const { user } = job.data;
-		debug('Start job', user);
-		return B.getBotScore(user);
+		const { userId } = job.data;
+		debug('Start job', userId);
+		return B.getBotScore({ userId });
 	} catch (error) {
 		logError(error);
 		return null;

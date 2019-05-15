@@ -16,31 +16,32 @@ const TEXT_SEARCH_ANALYSIS = 'Text search analysis';
 
 
 async function scheduleUsersAnalysis({
-	users, analysisType, context
+	userIds, analysisType, context
 }) {
-	const unscoredUsers = users.filter(user => !cache.getUserById(user.userId));
+	const uniqueUserIds = [...new Set(userIds)];
+	const unscoredUserIds = uniqueUserIds.filter(userId => !cache.getUserById(userId));
 
-	debug(`Found ${users.length} users with ${unscoredUsers.length} not already in the cache`);
+	debug(`Found ${uniqueUserIds.length} unique users with ${unscoredUserIds.length} not already in the cache`);
 
 	const promises = [];
 	const startTimestamp = new Date().getTime();
 
-	if (!unscoredUsers.length) {
-		await answer({ users, analysisType, context });
+	if (!unscoredUserIds.length) {
+		await answer({ userIds, analysisType, context });
 		return;
 	}
 
-	unscoredUsers.forEach((user) => {
+	unscoredUserIds.forEach((userId) => {
 		// When there are multiple tweets from the same user, it's possible that its score have already been got.
-		if (cache.getUserById(user.userId)) {
+		if (cache.getUserById(userId)) {
 			return;
 		}
 
 		promises.push(botometerQueue.add({
-			user,
+			userId,
 			startTimestamp,
-			users,
-			unscoredUsers,
+			userIds,
+			unscoredUserIds,
 			analysisType,
 			context,
 		}, {
@@ -56,7 +57,7 @@ async function scheduleUsersAnalysis({
 	setTimeout(() => {
 		// Remove all jobs after timeout expired
 		jobs.forEach((job) => {
-			debug('Remove job', job.id, job.data.user.userId, job.timestamp);
+			debug('Remove job', job.id, job.data.userId, job.timestamp);
 			job.remove().catch(logError);
 		});
 	}, durationTimeout);
@@ -69,25 +70,25 @@ botometerQueue.on('completed', botometerOnCompleted);
 async function botometerOnCompleted(job, botometerScore) {
 	try {
 		const {
-			user,
+			userId,
 			startTimestamp,
-			users,
-			unscoredUsers,
+			userIds,
+			unscoredUserIds,
 			analysisType,
 			context,
 		} = job.data;
 
-		debug(`Botometer job for user ${user.userId} completed`);
+		debug(`Botometer job for user ${userId} completed`);
 
-		if (!botometerScore) {
-			debug(`Add in the cache user without score: ${user.userId}`);
-			cache.addUser(user.screenName, user.userId, 'NA');
+		if (!botometerScore) { // TODO: test in the botometer job
+			debug(`Add in the cache user without score: ${userId}`);
+			cache.addUser(undefined, userId, 'NA');
 		} else {
 			debug(`Add in the cache user with score: ${botometerScore.user.screen_name}, ${botometerScore.user.id_str}, ${botometerScore.botometer.display_scores.universal}`);
 			cache.addUser(botometerScore.user.screen_name, botometerScore.user.id_str, botometerScore.botometer.display_scores.universal);
 		}
 
-		const stillUnscoredUsers = unscoredUsers.filter(user => !cache.getUserById(user.userId));
+		const stillUnscoredUsers = unscoredUserIds.filter(userId => !cache.getUserById(userId));
 		debug('Remaining users to be scored for this search', stillUnscoredUsers.length);
 
 		const isTimeoutExpired = new Date() >= new Date(startTimestamp + config.get('hooks.botometerAnalyser.timeout'));
@@ -96,7 +97,7 @@ async function botometerOnCompleted(job, botometerScore) {
 			debug(`Users remaining to score: ${stillUnscoredUsers.length}, is timeout expired? ${isTimeoutExpired}`);
 			debug(`Botometer analyser: Job (${job.timestamp}, ${job.id}) completed for analysis "${context}"`);
 
-			await answer({ users, analysisType, context });
+			await answer({ userIds, analysisType, context });
 		}
 	} catch (error) {
 		logError(error);
@@ -104,8 +105,8 @@ async function botometerOnCompleted(job, botometerScore) {
 }
 
 
-async function answer({ users, analysisType, context }) {
-	const analysis = await analyseUsersScores(users);
+async function answer({ userIds, analysisType, context }) {
+	const analysis = await analyseUsersScores({ userIds });
 
 	if (analysisType === TEXT_SEARCH_ANALYSIS) {
 		await answerTextSearchAnalysis({ context, analysis });
@@ -116,9 +117,9 @@ async function answer({ users, analysisType, context }) {
 }
 
 
-async function analyseUsersScores(users = []) {
+async function analyseUsersScores({ userIds }) {
 	// Get all users relate to the requester's search from cache
-	const cachedUsers = users.map(user => cache.getUserById(user.userId)).filter(user => !!user);
+	const cachedUsers = userIds.map(userId => cache.getUserById(userId)).filter(user => !!user);
 	// Uniquify this array
 	const uniquedCachedUsers = cachedUsers.filter((user, position, array) => array.map(user => user.userId).indexOf(user.userId) === position);
 
@@ -129,7 +130,7 @@ async function analyseUsersScores(users = []) {
 	const usersPercentage = utils.percentagesBotHuman(uniqueUsersScores);
 
 	let imageFileName;
-	if (users.length) {
+	if (userIds.length) {
 		imageFileName = await graph.generateFromScores(uniqueUsersScores, scores);
 	}
 

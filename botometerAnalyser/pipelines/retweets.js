@@ -85,10 +85,8 @@ async function onRetweetersCompleted(job, result) {
 			return;
 		}
 
-		const users = retweeterIds.map(userId => ({ userId }));
-
 		await usersAnalysis.scheduleUsersAnalysis({
-			users,
+			userIds: retweeterIds,
 			analysisType: usersAnalysis.RETWEET_ANALYSIS,
 			context: {
 				screenName,

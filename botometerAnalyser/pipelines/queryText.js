@@ -37,10 +37,10 @@ async function onTwitterSearchCompleted(job, result) {
 			});
 		}
 
-		const users = tweets.map(tweet => ({ userId: tweet.user.id_str }));
+		const userIds = tweets.map(tweet => (tweet.user.id_str));
 
 		await usersAnalysis.scheduleUsersAnalysis({
-			users,
+			userIds,
 			analysisType: usersAnalysis.TEXT_SEARCH_ANALYSIS,
 			context: {
 				search,
