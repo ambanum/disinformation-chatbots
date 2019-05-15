@@ -15,8 +15,15 @@ Example result in Mattermost where a slash command is set up to be used as `/bot
 
 # Installation
 
-After cloning the repository, install dependencies:
+After cloning the repository, install `cairo`:
 
+On ubuntu:
+```
+    sudo apt update
+    sudo apt install libcairo2-dev libjpeg-dev libgif-dev redis
+```
+
+Then:
 ```
     npm install
 ```
@@ -57,6 +64,61 @@ In order to start a server that responds to incoming requests from a Mattermost 
 ```
     npm start
 ```
+
+# Dev
+
+Create a file `.env`:
+```
+TWITTER_CONSUMER_KEY=xxx
+TWITTER_CONSUMER_SECRET=xxx
+TWITTER_ACCESS_TOKEN_KEY=xxx
+TWITTER_ACCESS_TOKEN_SECRET=xxx
+MASHAPE_KEY=xxx
+```
+
+Install `docker`. Run a mattermost image: `docker run --name mattermost-preview -d --publish 8065:8065 --add-host dockerhost:127.0.0.1 mattermost/mattermost-preview`
+
+Access the local mattermost instance at `localhost:8065`. Create a new team, a new channel, an integration (slash command) to `http://host.docker.internal:3000/botometer` (GET). In "system console"/"advanced"/"developer", add the trusted hosts `127.0.0.1 localhost host.docker.internal`.
+
+Install redis and run a server: `redis-server`.
+
+Create the file `config/development.js`:
+```
+{
+    "hooks": {
+        "domain": "http://localhost:3000",
+        "botometerAnalyser": {
+            "mattermost": {
+                "token": "xxx"
+            }
+        },
+        "sendToAnalysis": {
+            "incomingWebHookUrl": "http://localhost:8065/hooks/xxx",
+            "actionUrl": "http://host.docker.internal:3000/media-scale",
+            "actionResponseUrl": "http://localhost:8065/hooks/xxx"
+        }
+    }
+}
+```
+
+To run the automated tests:
+```
+npm test
+```
+
+To run manual tests:
+
+```
+DEBUG=BotometerAnalyser:* npm start
+```
+
+
+## Linux
+
+The magic hostname `host.docker.internal` does not work on linux systems yet.
+
+Run `docker run --name mattermost-preview -d --publish 8065:8065 --network="host" mattermost/mattermost-preview`, access at address `http://127.0.0.1:8065`, set the integration to `http://127.0.0.1:3000/botometer`.
+
 
 # License
 

@@ -6,7 +6,13 @@ const graph = require('../../botometerAnalyser/graph');
 const app = require('../../app');
 
 // As resulting generated image depends of the OS it will be ran, there is a specific image generated on the OS of the CI
-const expectedGeneratedGraphPath = `./test/botometerAnalyser/fixtures/graph/expectedGraph${process.env.CI ? '-CI' : ''}.png`;
+let suffix = '';
+if (process.env.UBUNTU) {
+	suffix = '-ubuntu';
+} else if (process.env.CI) {
+	suffix = '-CI';
+}
+const expectedGeneratedGraphPath = `./test/botometerAnalyser/fixtures/graph/expectedGraph${suffix}.png`;
 
 describe('BotometerAnalyser graph', () => {
 	describe('#generateFromScores', () => {

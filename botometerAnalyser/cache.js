@@ -8,34 +8,27 @@ const db = low(adapter);
 // Set some defaults (required if your JSON file is empty)
 db.defaults({ users: [] }).write();
 
-function addUser(screenName, id, score) {
-	const alreadyExists = db.get('users').find({ id }).value();
+function addUser(screenName, userId, score) {
+	const alreadyExists = db.get('users').find({ userId }).value();
 	if (alreadyExists) {
 		db.get('users')
-			.find({ id })
+			.find({ userId })
 			.assign({ screenName, score })
 			.write();
 	} else {
 		db.get('users')
-			.push({ id, screenName, score })
+			.push({ userId, screenName, score })
 			.write();
 	}
 }
 
-function getUserByName(screenName) {
+function getUserById(userId) {
 	return db.get('users')
-		.find({ screenName })
-		.value();
-}
-
-function getUserById(id) {
-	return db.get('users')
-		.find({ id })
+		.find({ userId })
 		.value();
 }
 
 module.exports = {
 	addUser,
-	getUserByName,
-	getUserById
+	getUserById,
 };
