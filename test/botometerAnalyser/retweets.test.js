@@ -27,17 +27,10 @@ describe('BotometerAnalyser retweets', () => {
 		});
 		it('should schedule a job with proper params', () => {
 			expect(stubs.scheduleUsersAnalysis.getCall(0).args[0]).to.deep.equal({
-				users: [
-					{
-						userId: '45',
-					},
-					{
-						userId: '62',
-					},
-				],
+				userIds: ['45', '62'],
 				analysisType: 'Retweet analysis',
 				context: {
-					tweet: { sometweet: 42, retweet_count: 12  },
+					tweet: { sometweet: 42, retweet_count: 12 },
 					screenName: 'twitterTestUser',
 					responseUrl: 'http://mattermost-server.com',
 					requesterUsername: 'michelbl',
