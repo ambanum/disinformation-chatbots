@@ -70,7 +70,8 @@ async function onRetweetersCompleted(job, result) {
 		const retweeterIds = job.data.retweeterIds.concat(retweeterIdsBatch);
 
 		if (nextCursor !== '0') {
-			// NB: Currently this never happens
+			// NB: Currently pagination is not working
+			// Only 100 retweets are returned, even though the documentation says the contrary.
 			// See https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/get-statuses-retweeters-ids.html, https://github.com/sferik/twitter/issues/425
 			await retweeterIdsQueue.add({
 				screenName,

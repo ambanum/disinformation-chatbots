@@ -7,7 +7,7 @@ const queryText = require('./pipelines/queryText');
 const retweets = require('./pipelines/retweets');
 
 
-const RETWEET_REGEXP = /^https:\/\/twitter\.com\/([^\/]*)\/status\/(\d+)$/;
+const RETWEET_REGEXP = /^https:\/\/twitter\.com\/([^/]*)\/status\/(\d+)$/;
 
 const router = express.Router();
 
@@ -52,7 +52,7 @@ async function startRetweetPipeline({
 
 	return `
 Roger! I'm analysing the probability that the accounts that have retweeted that tweet by @${screenName} are robots.
-${activeJobsCount ? '\n:mantelpiece_clock: _I’m already running an analysis, I will search for yours as soon as possible._' : '\n_In order to limit that search to 25 minutes, we might not analyse all retweeters._'}
+${activeJobsCount ? '\n:mantelpiece_clock: _I’m already running an analysis, I will search for yours as soon as possible._' : '\n_Due to Twitter API’s limitations, my analysis will be based on 100 retweets only._'}
 `;
 }
 
