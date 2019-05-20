@@ -24,23 +24,7 @@ describe('BotometerAnalyser queryText', () => {
 		});
 		it('should schedule a job with proper params', () => {
 			expect(stubs.scheduleUsersAnalysis.getCall(0).args[0]).to.deep.equal({
-				users: [
-					{
-						userId: '11348282',
-					},
-					{
-						userId: '11348282',
-					},
-					{
-						userId: '11348282',
-					},
-					{
-						userId: '842625693733203968',
-					},
-					{
-						userId: '19802879',
-					}
-				],
+				userIds: ['11348282', '11348282', '11348282', '842625693733203968', '19802879'],
 				analysisType: 'Text search analysis',
 				context: {
 					search: 'test',

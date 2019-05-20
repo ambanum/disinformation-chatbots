@@ -12,6 +12,9 @@ const usersWithoutDuplicates = [
 
 const usersWithDuplicates = [...usersWithoutDuplicates, usersWithoutDuplicates[2]];
 
+const userIdsWithoutDuplicates = usersWithoutDuplicates.map(user => user.userId);
+const userIdsWithDuplicates = usersWithDuplicates.map(user => user.userId);
+
 const scores = {
 	user1: 0.5,
 	user2: 0.8,
@@ -26,8 +29,8 @@ describe('BotometerAnalyser usersAnalysis', () => {
 	});
 
 	describe('#analyseUsersScores', () => {
-		context('without arguments', () => {
-			it('should return a proper empty result object', () => usersAnalysis.analyseUsersScores().then((result) => {
+		context('with no user', () => {
+			it('should return a proper empty result object', () => usersAnalysis.analyseUsersScores({ userIds: [] }).then((result) => {
 				expect(result).to.deep.equal({
 					shares: {
 						total: 0,
@@ -50,7 +53,7 @@ describe('BotometerAnalyser usersAnalysis', () => {
 			context('when each users tweets only one time', () => {
 				let result;
 				before(async () => {
-					result = await usersAnalysis.analyseUsersScores(usersWithoutDuplicates);
+					result = await usersAnalysis.analyseUsersScores({ userIds: userIdsWithoutDuplicates });
 				});
 				it('should return a proper shares analysis', () => {
 					expect(result.shares).to.deep.equal({
@@ -76,7 +79,7 @@ describe('BotometerAnalyser usersAnalysis', () => {
 			context('when at least a user tweets multiple times', () => {
 				let result;
 				before(async () => {
-					result = await usersAnalysis.analyseUsersScores(usersWithDuplicates);
+					result = await usersAnalysis.analyseUsersScores({ userIds: userIdsWithDuplicates });
 				});
 				it('should return a proper shares analysis', () => {
 					expect(result.shares).to.deep.equal({
@@ -101,4 +104,3 @@ describe('BotometerAnalyser usersAnalysis', () => {
 		});
 	});
 });
-
