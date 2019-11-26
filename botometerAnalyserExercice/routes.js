@@ -45,10 +45,10 @@ router.get('/', async (req, res, next) => {
 				case 'PLAYER':
 					result.score = randomIntFromInterval(0, 1.4);
 					break;
-				case 'MANUAL_DUMMY':
-					result.score = randomIntFromInterval(1.4, 3.8);
+				case 'MANUAL_DUMMY': // gaussienne 1.5
+					result.score = randomIntFromInterval(0.8, 3);
 					break;
-				case 'AUTO_DUMMY':
+				case 'AUTO_DUMMY': // gaussienne 4.5
 					result.score = randomIntFromInterval(2.5, 5);
 					break;
 				case 'ANIMATOR':

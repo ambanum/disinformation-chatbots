@@ -6,6 +6,7 @@ const logger = require('morgan');
 
 const botometerAnalyserRouter = require('./botometerAnalyser/routes').router;
 const botometerAnalyserRouterExercice = require('./botometerAnalyserExercice/routes').router;
+const reverseRouterExercice = require('./reverse/routes').router;
 const sendToAnalysisRouter = require('./sendToAnalysis/routes');
 const mediaScaleRouter = require('./mediaScale/routes');
 
@@ -21,5 +22,6 @@ app.use('/botometer/', botometerAnalyserRouter);
 app.use('/sendToAnalysis/', sendToAnalysisRouter);
 app.use('/media-scale/', mediaScaleRouter);
 app.use('/botometer-exercice/', botometerAnalyserRouterExercice);
+app.use('/reverse/', reverseRouterExercice);
 
 module.exports = app;
