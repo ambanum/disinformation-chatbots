@@ -6,8 +6,6 @@ const uuidv1 = require('uuid/v1');
 
 const router = express.Router();
 
-const mattermostToken = config.get('hooks.botometerAnalyser.mattermost.tokenExercice');
-
 router.get('/', async (req, res, next) => {
 	const {
 		token: givenToken,
@@ -18,13 +16,13 @@ router.get('/', async (req, res, next) => {
 
 	if (!text) {
 		return res.json({
-			text: 'Salut! Je peux vous aider en analysant les dernièrs tweets sur un sujet spécifique, mais j\'ai besoin d\'une requête.\nAlors, donnez-moi un mot clé, une URL ou du texte. Par exemple : \n`/botometer variole`'
+			text: 'Salut! Je peux vous aider en effectuant une recherche inversée d\'image, pour cela j\'ai besoin d\'une url. Par exemple : \n`/source <image url>`'
 		});
 	}
 
 	res.json({
 		response_type: 'in_channel',
-		text: `Okay ! J'analyse la probabilité que les comptes qui ont tweetés sur le sujet **"${text}"** soient des robots et je vous réponds dans les 5 min.`,
+		text: `Okay ! Je vais voir ce que je trouve pour cette image et je réponds rapidement.`,
 	});
 
 	const fileName = uuidv1();
@@ -70,6 +68,7 @@ router.get('/', async (req, res, next) => {
 				text: `@${requesterUsername} Voilà!`,
 				response_type: 'in_channel',
 				attachments: [{
+          color: '#E0995E',
 					title: 'Voici l\'image que j\'ai recherché analysé',
 					title_link: imageUrl,
 					image_url: imageUrl,
