@@ -30,7 +30,7 @@ router.get('/', async (req, res, next) => {
 
 	res.json({
 		response_type: 'in_channel',
-		text: `Okay! J'analyse la probabilité que les comptes qui ont tweet sur le sujet "${text}" soient des robots et je vous réponds dans les 5 min.`,
+		text: `Okay! J'analyse la probabilité que les comptes qui ont tweet sur le sujet **"${text}"** soient des robots et je vous réponds dans les 5 min.`,
 	});
 
 	request('https://observateur:V%40riole19@www.socialroom.crisotech.com/api/modules/twitter/tweets?firstPosition=-1&keywords=t&maxResults=250')
@@ -91,28 +91,28 @@ router.get('/', async (req, res, next) => {
 				url: responseUrl,
 				method: 'POST',
 				json: {
-					text: `@${requesterUsername} Done!`,
+					text: `@${requesterUsername} Voilà!`,
 					response_type: 'in_channel',
 					attachments: [
 						{
-							title: 'During the last 7 days',
+							// title: 'During the last 7 days',
 							fields: [
 								{
 									short: false,
-									title: `On the latest ${analysis.shares.total} shares of "${text}":`,
-									value: `**${analysis.shares.percentageBot}%** have a high probability to be made by bots\n**${analysis.shares.percentageHuman}%** have a high probability to be made by humans\nFor the remaining **${analysis.shares.percentageUnknown}%** it's difficult to say`
+									title: `Sur les ${analysis.shares.total} derniers tweets de "${text}" :`,
+									value: `**${analysis.shares.percentageBot}%** ont une grande probabilité d'avoir été ecrit par des robots\n**${analysis.shares.percentageHuman}%** ont une grande probabilité d'avoir été ecrit par des humains\nPour les **${analysis.shares.percentageUnknown}%** restants, c'est difficile à dire`
 								},
 								{
 									short: false,
-									title: `On the ${analysis.users.total} users who have written content that contains "${text}":`,
-									value: `**${analysis.users.percentageBot}%** have a high probability to be bots\n**${analysis.users.percentageHuman}%** have a high probability to be humans\nFor the remaining **${analysis.users.percentageUnknown}%** it's difficult to say`
+									title: `Sur les ${analysis.users.total} utilisateurs qui ont rédigé un tweet contenant "${text}" :`,
+									value: `**${analysis.users.percentageBot}%** ont une grande probabilité d'être des robots\n**${analysis.users.percentageHuman}%** ont une grande probabilité d'être des humains\nPour les **${analysis.users.percentageUnknown}%** restants, c'est difficile à dire`
 								},
 							],
 						},
 						{
-							title: 'Here is the distribution',
-							title_link: `${config.get('hooks.domain')}/images/botometerAnalyser/${analysis.imageUrl}.png`,
-							image_url: `${config.get('hooks.domain')}/images/botometerAnalyser/${analysis.imageUrl}.png`
+							title: 'Voici un graph de distribution',
+							title_link: `${config.get('hooks.domain')}/images/botometerAnalyser/exercice/${analysis.imageUrl}.png`,
+							image_url: `${config.get('hooks.domain')}/images/botometerAnalyser/exercice/${analysis.imageUrl}.png`
 						}
 					]
 				},
