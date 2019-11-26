@@ -56,7 +56,24 @@ router.get('/', async (req, res, next) => {
 	}).then(async (res) => {
 		console.log(res);
 
-		let fields = res.links.map((link) => {
+		let links = res.links;
+
+		const pinterestUrl = `https://api.pinterest.com/v3/visual_search/flashlight/url/?url=${imageUrl}&x=0&y=0&w=1&h=1`;
+
+		let pintLinks;
+		// await request(pinterestUrl).then((pintResponse) => {
+		// 	const pintResult = JSON.parse(pintResponse);
+		// 	if (pintResult && pintResult.data) {
+		// 		pintLinks = pintResult.data.slice(0, 5).map(r => r.link);
+		// 	}
+		// });
+
+		links = [...links];
+		links = links.filter((value, index) => {
+			return links.indexOf(value) === index;
+		});
+
+		let fields = links.map((link) => {
 			return {
 				short: false,
 				value: `[${link}](${link})`
@@ -71,39 +88,13 @@ router.get('/', async (req, res, next) => {
 		const yandexUrl = `https://www.yandex.com/images/search?text=${imageUrl}&img_url=${imageUrl}&rpt=imageview`;
 		const yandexAttachement = {
 			color: '#E0995E',
-			title: 'Autres résultats possibles : Yandex',
+			title: 'Autres résultats possibles',
 			title_link: yandexUrl,
 			fields: [{
 				short: false,
 				value: `[↗ Afficher les résultats Yandex](${yandexUrl})`
 			}]
 		};
-
-		const pinterestUrl = `https://api.pinterest.com/v3/visual_search/flashlight/url/?url=${imageUrl}&x=0&y=0&w=1&h=1`;
-
-		let pintLinksFields;
-		await request(pinterestUrl).then((pintResponse) => {
-      const pintResult = JSON.parse(pintResponse);
-			if (pintResult && pintResult.data) {
-				pintLinksFields = pintResult.data.slice(0, 5).map(r => ({
-					short: false,
-					value: r.link
-				}));
-			}
-		});
-		const pinterestAttachement = {
-			color: '#E0995E',
-			title: 'Autres résultats possibles : Pinterest',
-			title_link: yandexUrl,
-			fields: pintLinksFields
-		};
-
-		if (res.links.length === 0) {
-			fields = [{
-				short: false,
-				value: 'Désolé mais je n\'ai rien trouvé pour cette image.'
-			}];
-		}
 
 		request({
 			url: responseUrl,
@@ -117,7 +108,7 @@ router.get('/', async (req, res, next) => {
 					title_link: imageUrl,
 					image_url: imageUrl,
 					fields,
-				}, pinterestAttachement, yandexAttachement]
+				}, yandexAttachement]
 			},
 		});
 	});
