@@ -95,7 +95,6 @@ router.get('/', async (req, res, next) => {
 					response_type: 'in_channel',
 					attachments: [
 						{
-							// title: 'During the last 7 days',
 							fields: [
 								{
 									short: false,
@@ -110,9 +109,15 @@ router.get('/', async (req, res, next) => {
 							],
 						},
 						{
-							title: 'Voici un graph de distribution',
+							title: 'Voici un graphe de distribution des comptes par type',
 							title_link: `${config.get('hooks.domain')}/images/botometerAnalyser/exercice/${analysis.imageUrl}.png`,
-							image_url: `${config.get('hooks.domain')}/images/botometerAnalyser/exercice/${analysis.imageUrl}.png`
+							image_url: `${config.get('hooks.domain')}/images/botometerAnalyser/exercice/${analysis.imageUrl}.png`,
+							fields: [
+								{
+									short: false,
+									value: `[Voir le graphe de distribution en plein écran](${config.get('hooks.domain')}/images/botometerAnalyser/exercice/${analysis.imageUrl}.png)`
+								},
+							]
 						}
 					]
 				},

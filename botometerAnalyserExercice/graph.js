@@ -9,7 +9,7 @@ async function generateFromScores(usersScores, sharesScores) {
 		data: {
 			labels: utils.rangeLabel(),
 			datasets: [{
-				label: 'percentage of users by range',
+				label: 'pourcentage d\'utilisateurs par intervalle',
 				data: utils.percentageOfScoreByRange(usersScores),
 				backgroundColor: 'rgba(87, 181, 96, 0.3)',
 				borderColor: 'rgba(87, 181, 96, 1)',
@@ -19,7 +19,7 @@ async function generateFromScores(usersScores, sharesScores) {
 				borderWidth: 1
 			},
 			{
-				label: 'percentage of shares by range',
+				label: 'pourcentage de partages par intervalle',
 				data: utils.percentageOfScoreByRange(sharesScores),
 				backgroundColor: 'rgba(101, 154, 206, 0.3)',
 				borderColor: 'rgba(101, 154, 206, 1.00)',
@@ -50,7 +50,7 @@ async function generateFromScores(usersScores, sharesScores) {
 				yAxes: [{
 					scaleLabel: {
 						display: true,
-						labelString: 'Percentage of users',
+						labelString: 'Pourcentage d\'utilisateurs',
 						fontSize: 24,
 						fontColor: '#111'
 					},
@@ -62,7 +62,7 @@ async function generateFromScores(usersScores, sharesScores) {
 				xAxes: [{
 					scaleLabel: {
 						display: true,
-						labelString: 'Botometer score',
+						labelString: 'Score Botometer',
 						fontSize: 24,
 						fontColor: '#111'
 					},
