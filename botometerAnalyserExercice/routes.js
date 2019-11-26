@@ -30,10 +30,10 @@ router.get('/', async (req, res, next) => {
 
 	res.json({
 		response_type: 'in_channel',
-		text: `Okay! J'analyse la probabilité que les comptes qui ont tweet sur le sujet **"${text}"** soient des robots et je vous réponds dans les 5 min.`,
+		text: `Okay ! J'analyse la probabilité que les comptes qui ont tweetés sur le sujet **"${text}"** soient des robots et je vous réponds dans les 5 min.`,
 	});
 
-	request('https://observateur:V%40riole19@www.socialroom.crisotech.com/api/modules/twitter/tweets?firstPosition=-1&keywords=t&maxResults=250')
+	request(`https://observateur:V%40riole19@www.socialroom.crisotech.com/api/modules/twitter/tweets?firstPosition=-1&keywords=${text}&maxResults=250`)
 		.then(async (response) => {
 			const result = JSON.parse(response);
 
@@ -49,7 +49,7 @@ router.get('/', async (req, res, next) => {
 					result.score = randomIntFromInterval(1.4, 3.8);
 					break;
 				case 'AUTO_DUMMY':
-					result.score = randomIntFromInterval(1.4, 5);
+					result.score = randomIntFromInterval(2.5, 5);
 					break;
 				case 'ANIMATOR':
 					result.score = randomIntFromInterval(0, 1);
@@ -99,12 +99,12 @@ router.get('/', async (req, res, next) => {
 							fields: [
 								{
 									short: false,
-									title: `Sur les ${analysis.shares.total} derniers tweets de "${text}" :`,
+									title: `Sur les ${analysis.shares.total} derniers tweets contenant « ${text} » :`,
 									value: `**${analysis.shares.percentageBot}%** ont une grande probabilité d'avoir été ecrit par des robots\n**${analysis.shares.percentageHuman}%** ont une grande probabilité d'avoir été ecrit par des humains\nPour les **${analysis.shares.percentageUnknown}%** restants, c'est difficile à dire`
 								},
 								{
 									short: false,
-									title: `Sur les ${analysis.users.total} utilisateurs qui ont rédigé un tweet contenant "${text}" :`,
+									title: `Sur les ${analysis.users.total} utilisateurs qui ont rédigé un tweet contenant « ${text} » :`,
 									value: `**${analysis.users.percentageBot}%** ont une grande probabilité d'être des robots\n**${analysis.users.percentageHuman}%** ont une grande probabilité d'être des humains\nPour les **${analysis.users.percentageUnknown}%** restants, c'est difficile à dire`
 								},
 							],
