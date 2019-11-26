@@ -53,7 +53,7 @@ router.get('/', async (req, res, next) => {
 			resized_images: false
 		},
 		json: true
-	}).then((res) => {
+	}).then(async (res) => {
 		console.log(res);
 
 		let fields = res.links.map((link) => {
@@ -68,15 +68,34 @@ router.get('/', async (req, res, next) => {
 			value: 'Voici les différents résultats possibles :'
 		}, ...fields];
 
-    const yandexUrl = `https://www.yandex.com/images/search?text=${imageUrl}&img_url=${imageUrl}&rpt=imageview`;
+		const yandexUrl = `https://www.yandex.com/images/search?text=${imageUrl}&img_url=${imageUrl}&rpt=imageview`;
 		const yandexAttachement = {
 			color: '#E0995E',
-			title: 'Autres résultats possibles',
+			title: 'Autres résultats possibles : Yandex',
 			title_link: yandexUrl,
 			fields: [{
 				short: false,
 				value: `[↗ Afficher les résultats Yandex](${yandexUrl})`
 			}]
+		};
+
+		const pinterestUrl = `https://api.pinterest.com/v3/visual_search/flashlight/url/?url=${imageUrl}&x=0&y=0&w=1&h=1`;
+
+		let pintLinksFields;
+		await request(pinterestUrl).then((pintResponse) => {
+      const pintResult = JSON.parse(pintResponse);
+			if (pintResult && pintResult.data) {
+				pintLinksFields = pintResult.data.slice(0, 5).map(r => ({
+					short: false,
+					value: r.link
+				}));
+			}
+		});
+		const pinterestAttachement = {
+			color: '#E0995E',
+			title: 'Autres résultats possibles : Pinterest',
+			title_link: yandexUrl,
+			fields: pintLinksFields
 		};
 
 		if (res.links.length === 0) {
@@ -98,7 +117,7 @@ router.get('/', async (req, res, next) => {
 					title_link: imageUrl,
 					image_url: imageUrl,
 					fields,
-				}, yandexAttachement]
+				}, pinterestAttachement, yandexAttachement]
 			},
 		});
 	});
