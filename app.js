@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
 const botometerAnalyserRouter = require('./botometerAnalyser/routes').router;
+const botometerAnalyserRouterExercice = require('./botometerAnalyserExercice/routes').router;
 const sendToAnalysisRouter = require('./sendToAnalysis/routes');
 const mediaScaleRouter = require('./mediaScale/routes');
 
@@ -19,5 +20,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/botometer/', botometerAnalyserRouter);
 app.use('/sendToAnalysis/', sendToAnalysisRouter);
 app.use('/media-scale/', mediaScaleRouter);
+app.use('/botometer-exercice/', botometerAnalyserRouterExercice);
 
 module.exports = app;
