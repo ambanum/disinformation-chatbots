@@ -40,9 +40,11 @@ router.get('/', async (req, res, next) => {
 			.on('error', (error) => {
 				console.error(error);
 			});
-  }
+	}
 
-  const imageUrl = isSocialRoom ? `${config.get('hooks.domain')}/images/reverse/${fileName}.png` : text;
+	const imageUrl = isSocialRoom ? `${config.get('hooks.domain')}/images/reverse/${fileName}.png` : text;
+
+	console.log(imageUrl);
 
 	await request('http://localhost:5000/search', {
 		method: 'POST',
@@ -54,12 +56,24 @@ router.get('/', async (req, res, next) => {
 	}).then((res) => {
 		console.log(res);
 
-		const fields = res.links.map((link) => {
+		let fields = res.links.map((link) => {
 			return {
 				short: false,
 				value: `[${link}](${link})`
 			};
 		});
+
+		fields = [{
+			short: false,
+			value: 'Voici les différents résultats possibles :'
+		}, ...fields];
+
+		if (res.links.length === 0) {
+			fields = [{
+				short: false,
+				value: 'Désolé mais je n\'ai rien trouvé pour cette image.'
+			}];
+		}
 
 		request({
 			url: responseUrl,
@@ -68,16 +82,11 @@ router.get('/', async (req, res, next) => {
 				text: `@${requesterUsername} Voilà!`,
 				response_type: 'in_channel',
 				attachments: [{
-          color: '#E0995E',
-					title: 'Voici l\'image que j\'ai recherché analysé',
+					color: '#E0995E',
+					title: 'Voici l\'image que j\'ai recherché',
 					title_link: imageUrl,
 					image_url: imageUrl,
-					fields: [{
-							short: false,
-							value: 'Voici les différents résultats possibles :'
-						},
-						...fields,
-					]
+					fields,
 				}]
 			},
 		});
