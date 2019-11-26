@@ -22,7 +22,7 @@ router.get('/', async (req, res, next) => {
 
 	res.json({
 		response_type: 'in_channel',
-		text: `Okay ! Je vais voir ce que je trouve pour cette image et je réponds rapidement.`,
+		text: `Okay ! Je vais voir ce que je trouve pour l'image ${text} et je réponds rapidement.`,
 	});
 
 	const fileName = uuidv1();
@@ -68,6 +68,17 @@ router.get('/', async (req, res, next) => {
 			value: 'Voici les différents résultats possibles :'
 		}, ...fields];
 
+    const yandexUrl = `https://www.yandex.com/images/search?text=${imageUrl}&img_url=${imageUrl}&rpt=imageview`;
+		const yandexAttachement = {
+			color: '#E0995E',
+			title: 'Autres résultats possibles',
+			title_link: yandexUrl,
+			fields: [{
+				short: false,
+				value: `[↗ Afficher les résultats Yandex](${yandexUrl})`
+			}]
+		};
+
 		if (res.links.length === 0) {
 			fields = [{
 				short: false,
@@ -87,7 +98,7 @@ router.get('/', async (req, res, next) => {
 					title_link: imageUrl,
 					image_url: imageUrl,
 					fields,
-				}]
+				}, yandexAttachement]
 			},
 		});
 	});
