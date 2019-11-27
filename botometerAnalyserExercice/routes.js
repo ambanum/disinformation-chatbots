@@ -36,7 +36,7 @@ router.get('/', async (req, res, next) => {
 	const promises = [];
 	let position = -1;
 	let maxResult = 50;
-	for (let i = 0; i <= 5; i++) {
+	for (let i = 0; i <= 10; i++) {
 		const source = `https://observateur:V%40riole19@www.socialroom.crisotech.com/api/modules/twitter/tweets?firstPosition=${position}&keywords=${text}&maxResults=${maxResult}`;
 		position = maxResult;
 		maxResult += 50;
