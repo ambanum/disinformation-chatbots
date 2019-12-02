@@ -25,10 +25,28 @@ jobs:
     machine:
       enabled: true
     steps:
-      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "f8:eb:f2:35:d8:2c:c7:9b:8b:fa:18:b2:ae:07:2d:40"
       - run:
-          name: Deploy Over SSH
-          command: npm run deploy
+          name: Clone Ops repo
+          command: git clone https://github.com/ambanum/disinfo.quaidorsay.fr-ops.git /tmp/disinfo.quaidorsay.fr-ops
+      - run:
+          name: Update setuptools
+          command: pip install --upgrade setuptools
+      - run:
+          name: Install Ansible
+          command: pip install ansible
+      - run:
+          name: Install Ansible roles dependencies
+          command: cd /tmp/disinfo.quaidorsay.fr-ops && ansible-galaxy install -r requirements.yml
+      - run:
+          name: Add password
+          command: cd /tmp/disinfo.quaidorsay.fr-ops && echo $ANSIBLE_VAULT_PASSWORD > vault.key
+      - run:
+          name: Deploy app on the server
+          command: cd /tmp/disinfo.quaidorsay.fr-ops && ansible-playbook playbooks/apps/disinformation-chatbots.yml -i inventories/production.yml -t update
+
 workflows:
   version: 2
   build-and-deploy:

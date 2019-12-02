@@ -5,8 +5,7 @@
   "scripts": {
     "test": "ALLOW_CONFIG_MUTATIONS=true NODE_ENV=test mocha --file './test/helper.js' --recursive --exit",
     "test:debug": "ALLOW_CONFIG_MUTATIONS=true NODE_ENV=test mocha --file './test/helper.js' --recursive --inspect-brk --exit",
-    "start": "node ./bin/www",
-    "deploy": "./deploy/initiate.sh"
+    "start": "node ./bin/www"
   },
   "dependencies": {
     "bull": "^3.7.0",
