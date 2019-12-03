@@ -22,13 +22,13 @@ router.get('/', async (req, res, next) => {
 
 	if (!text) {
 		return res.json({
-			text: 'Salut! Je peux vous aider en effectuant une recherche inversée d\'image, pour cela j\'ai besoin d\'une url. Par exemple : \n`/source <image url>`'
+			text: 'Hey! I can help you by doing a reverse image search, for that I need a url. For example : \n`/source <image_url>`'
 		});
 	}
 
 	res.json({
 		response_type: 'in_channel',
-		text: `Okay ! Je vais voir ce que je trouve pour l'image ${text} et je réponds rapidement.`,
+		text: `Okay ! I'll see what I find for the image ${text} and I answer quickly.`,
 	});
 
 	const imageUrl = text;
