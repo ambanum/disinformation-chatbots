@@ -18,7 +18,7 @@ describe('MediaScale routes', () => {
 
 		context('with no query params', () => {
 			before(async () => {
-				({ status, body } = await request(app).get(apiURL));
+				({ status, body } = await request(app).get(apiURL).query({ token: config.get('hooks.mediaScale.mattermost.token') }));
 			});
 
 			it('responds with 200 HTTP code', () => expect(status).to.equal(200));
@@ -33,7 +33,7 @@ describe('MediaScale routes', () => {
 
 		context('with missing `region` params', () => {
 			before(async () => {
-				({ status, body } = await request(app).get(apiURL).query({ text: validShares }));
+				({ status, body } = await request(app).get(apiURL).query({ token: config.get('hooks.mediaScale.mattermost.token'), text: validShares }));
 			});
 
 			it('responds with 200 HTTP code', () => expect(status).to.equal(200));
@@ -44,7 +44,7 @@ describe('MediaScale routes', () => {
 
 		context('with missing `shares` params', () => {
 			before(async () => {
-				({ status, body } = await request(app).get(apiURL).query({ text: validRegionCode }));
+				({ status, body } = await request(app).get(apiURL).query({ token: config.get('hooks.mediaScale.mattermost.token'), text: validRegionCode }));
 			});
 
 			it('responds with 200 HTTP code', () => expect(status).to.equal(200));
@@ -57,7 +57,7 @@ describe('MediaScale routes', () => {
 		context('with bad formatted params', () => {
 			context('with wrong `region`', () => {
 				before(async () => {
-					({ status, body } = await request(app).get(apiURL).query({ text: `${invalidRegionCode} ${validShares}` }));
+					({ status, body } = await request(app).get(apiURL).query({ token: config.get('hooks.mediaScale.mattermost.token'), text: `${invalidRegionCode} ${validShares}` }));
 				});
 
 				it('responds with 200 HTTP code', () => expect(status).to.equal(200));
@@ -68,7 +68,7 @@ describe('MediaScale routes', () => {
 
 			context('with wrong format for `shares`', () => {
 				before(async () => {
-					({ status, body } = await request(app).get(apiURL).query({ text: `${validRegionCode} ${invalidShares}` }));
+					({ status, body } = await request(app).get(apiURL).query({ token: config.get('hooks.mediaScale.mattermost.token'), text: `${validRegionCode} ${invalidShares}` }));
 				});
 
 				it('responds with 200 HTTP code', () => expect(status).to.equal(200));
@@ -80,7 +80,7 @@ describe('MediaScale routes', () => {
 
 		context('with not already supported region', () => {
 			before(async () => {
-				({ status, body } = await request(app).get(apiURL).query({ text: `${notAlreadySupportedRegionCode} ${validShares}` }));
+				({ status, body } = await request(app).get(apiURL).query({ token: config.get('hooks.mediaScale.mattermost.token'), text: `${notAlreadySupportedRegionCode} ${validShares}` }));
 			});
 
 			it('responds with 200 HTTP code', () => expect(status).to.equal(200));
@@ -110,7 +110,7 @@ describe('MediaScale routes', () => {
 					.get('/media-scale/1.0/around')
 					.query(true)
 					.reply(200, result);
-				({ status, body } = await request(app).get(apiURL).query({ text: `${validRegionCode} ${validShares}` }));
+				({ status, body } = await request(app).get(apiURL).query({ token: config.get('hooks.mediaScale.mattermost.token'), text: `${validRegionCode} ${validShares}` }));
 			});
 
 			it('responds with 200 HTTP code', () => expect(status).to.equal(200));
