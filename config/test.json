@@ -15,6 +15,16 @@
             "maxAccountToAnalyse": 2,
             "dbFileName": "botometerAnalyser_cache_test.json",
             "redisDB": 1
+        },
+        "mediaScale": {
+            "mattermost": {
+                "token": "wfe1eo3tmtdf3jzprf94uh7mzr"
+            }
+        },
+        "reverse": {
+            "mattermost": {
+                "token": "4wqmzb76jpyt3nw4fy9budhc4y"
+            }
         }
     }
 }
