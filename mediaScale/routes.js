@@ -6,8 +6,14 @@ const moment = require('moment');
 
 const router = express.Router();
 
+const mattermostToken = config.get('hooks.mediaScale.mattermost.token');
+
 router.get('/', async (req, res) => {
-	const { text } = req.query;
+	const { token: givenToken, text } = req.query;
+
+	if (givenToken !== mattermostToken) {
+		return res.status(401).json({ Error: 'Missing or invalid token' });
+	}
 
 	if (!text) {
 		return res.json({
