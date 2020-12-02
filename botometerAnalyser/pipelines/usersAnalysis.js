@@ -84,8 +84,8 @@ async function botometerOnCompleted(job, botometerScore) {
 			debug(`Add in the cache user without score: ${userId}`);
 			cache.addUser(undefined, userId, 'NA');
 		} else {
-			debug(`Add in the cache user with score: ${botometerScore.user.screen_name}, ${botometerScore.user.id_str}, ${botometerScore.botometer.display_scores.universal}`);
-			cache.addUser(botometerScore.user.screen_name, botometerScore.user.id_str, botometerScore.botometer.display_scores.universal);
+			debug(`Add in the cache user with score: ${botometerScore.user.screen_name}, ${botometerScore.user.id_str}, ${botometerScore.botometer.display_scores.universal.overall}`);
+			cache.addUser(botometerScore.user.screen_name, botometerScore.user.id_str, botometerScore.botometer.display_scores.universal.overall);
 		}
 
 		const stillUnscoredUsers = unscoredUserIds.filter(userId => !cache.getUserById(userId));
