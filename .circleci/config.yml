@@ -35,6 +35,9 @@ jobs:
           name: Update setuptools
           command: pip install --upgrade setuptools
       - run:
+          name: Update pip
+          command: pip install --upgrade pip
+      - run:
           name: Install Ansible
           command: pip install ansible
       - run:
