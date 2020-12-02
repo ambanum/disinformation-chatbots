@@ -32,11 +32,11 @@ jobs:
           name: Clone Ops repo
           command: git clone https://github.com/ambanum/disinfo.quaidorsay.fr-ops.git /tmp/disinfo.quaidorsay.fr-ops
       - run:
-          name: Update setuptools
-          command: pip install --upgrade setuptools
-      - run:
           name: Update pip
           command: pip install --upgrade pip
+      - run:
+          name: Update setuptools
+          command: pip install --upgrade setuptools
       - run:
           name: Install Ansible
           command: pip install ansible
