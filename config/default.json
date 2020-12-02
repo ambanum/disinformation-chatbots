@@ -20,7 +20,7 @@
 			}
 		},
 		"mediaScale": {
-			"baseUrl": "http://disinfo.quaidorsay.fr/api"
+			"baseUrl": "https://disinfo.quaidorsay.fr/api"
 		}
 	}
 }
