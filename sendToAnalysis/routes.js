@@ -38,7 +38,7 @@ router.post('/', async (req, res) => {
 **${context.attachments[0].title}**
 ${context.attachments[0].text}
 
-:arrow_upper_left: **_Sent to [FR] Analysis_**
+:arrow_upper_left: **_Sent to [FR] Qualification_**
 `
 		}
 	});
