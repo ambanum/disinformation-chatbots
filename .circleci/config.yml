@@ -27,7 +27,7 @@ jobs:
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "f8:eb:f2:35:d8:2c:c7:9b:8b:fa:18:b2:ae:07:2d:40"
+            - "a1:0e:28:81:7a:d3:57:95:67:72:ee:f7:a5:08:cd:67"
       - run:
           name: Clone Ops repo
           command: git clone https://github.com/ambanum/disinfo.quaidorsay.fr-ops.git /tmp/disinfo.quaidorsay.fr-ops
