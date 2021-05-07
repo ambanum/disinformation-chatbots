@@ -28,6 +28,8 @@ Then:
     npm install
 ```
 
+See [Troubleshooting](#troubleshooting) in case of errors
+
 # Configuration
 
 Configure each hook in the proper environment file, for example in `production.json`:
@@ -119,6 +121,16 @@ The magic hostname `host.docker.internal` does not work on linux systems yet.
 
 Run `docker run --name mattermost-preview -d --publish 8065:8065 --network="host" mattermost/mattermost-preview`, access at address `http://127.0.0.1:8065`, set the integration to `http://127.0.0.1:3000/botometer`.
 
+
+# Troubleshoohting
+
+## Failed at the canvas@1.6.13 install script.
+
+```
+xcode-select --install
+brew install pkg-config cairo pango libpng jpeg giflib librsvg
+
+```
 
 # License
 
