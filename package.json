@@ -10,7 +10,7 @@
   "dependencies": {
     "bull": "^3.7.0",
     "bull-arena": "^2.6.2",
-    "chart.js": "^2.8.0",
+    "chart.js": "^2.9.4",
     "chartjs-node": "^1.7.1",
     "config": "^3.0.1",
     "cookie-parser": "~1.4.3",
